@@ -1,0 +1,10 @@
+<!--
+  insert_bottom '.payment-info'
+  original '9d4ef160bd508a47f906d7419c33cfc7eefc501d'
+-->
+<% if order.payment && order.payment.source_type.to_s.include?('Sermepa') %>
+    <span class="cc-type">
+    <%= image_tag 'creditcards/creditcard.gif', :id => 'creditcard-sermepa' %>
+      <%= t("payment_states.#{order.payment.state}") %>
+    </span>
+<% end %>
