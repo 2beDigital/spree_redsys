@@ -29,9 +29,13 @@ Install
 =======
 
 . Refactor & improve the code.
+
 . Write Rspecs, Tests tests...
+
 . Perhaps Iframe integration like Skrill.
+
 . Get Service Url from admin config instead of Active_Merchant Library.
+
 . Locales...
 
 Copyright (c) 2012, released under the New BSD License
