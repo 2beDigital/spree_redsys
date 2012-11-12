@@ -3,16 +3,16 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_sermepa'
   s.version     = '1.1.3'
-  s.summary     = 'TODO: Add gem summary here'
+  s.summary     = 'Adds Sermepa TPV as a Payment Method to Spree store'
   s.description = 'TODO: Add (optional) gem description here'
+  s.author    = 'Héctor Picazo'
+  s.email     = 'hector@ahaaa.es'
+  s.homepage  = 'http://www.2bedigital.com'
   s.required_ruby_version = '>= 1.8.7'
 
-   s.author    = 'Héctor Picazo'
-   s.email     = 'hector@ahaaa.es'
-   s.homepage  = 'http://www.2bedigital.com'
-
-  #s.files       = `git ls-files`.split("\n")
-  #s.test_files  = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.files       = `git ls-files`.split("\n")
+  s.test_files  = `git ls-files -- {test,spec,features}/*`.split("\n")
+  
   s.require_path = 'lib'
   s.requirements << 'none'
 
