@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.name        = 'spree_sermepa'
   s.version     = '1.1.3'
   s.summary     = 'Adds Sermepa TPV as a Payment Method to Spree store'
-  s.description = 'TODO: Add (optional) gem description here'
+  s.description = 'Sermepa is a spanish payment gateway. Servired Network'
   s.author    = 'Héctor Picazo'
   s.email     = 'hector@ahaaa.es'
   s.homepage  = 'http://www.2bedigital.com'
