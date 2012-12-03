@@ -2,7 +2,7 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_sermepa'
-  s.version     = '1.1.3'
+  s.version     = '1.2.3'
   s.summary     = 'Adds Sermepa TPV as a Payment Method to Spree store'
   s.description = 'Sermepa is a spanish payment gateway. Servired Network'
   s.author    = 'Héctor Picazo'
@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.requirements << 'none'
 
-  s.add_dependency 'spree_core', '~> 1.1.3'
+  s.add_dependency 'spree_core', '~> 1.2.0'
 
   s.add_dependency 'active_merchant_sermepa', '>= 0.1.1'
 
