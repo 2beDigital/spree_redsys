@@ -26,7 +26,8 @@
     <% service.customer_name "#{@order.ship_address.firstname} #{@order.ship_address.lastname}"%>
     <% service.language @payment_method.provider_class.language_code(I18n.locale) %>
     <% #Ds_Merchant_UrlKO
-       service.failure_url edit_order_checkout_url(@order, :state => 'payment')
+       #service.failure_url edit_order_checkout_url(@order, :state => 'payment')
+       service.failure_url checkout_state_path(@order.checkout_steps.third)
     %>
     <% #Ds_Merchant_UrlOK
        service.success_url sermepa_confirm_order_checkout_url(@order, :payment_method_id => @payment_method)

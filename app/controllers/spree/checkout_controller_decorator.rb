@@ -117,7 +117,7 @@ module Spree
       payment = @order.payments.create({:amount => @order.total,
                                         :source_type => 'Spree:SermepaCreditCard',
                                         :payment_method => payment_method },
-                                      :without_protection => true)
+                                        :without_protection => true)
       payment.started_processing!
       payment.pend!
     end
