@@ -68,7 +68,7 @@ module Spree
 
         @payment_method.provider_class::Helper.credentials = sermepa_credentials(payment_method)
         #set_cache_buster
-        render 'spree/shared/_sermepa_payment_checkout', :layout => 'application'
+        render 'spree/shared/_sermepa_payment_checkout', :layout => 'spree_sermepa_application'
       end
     end
 
