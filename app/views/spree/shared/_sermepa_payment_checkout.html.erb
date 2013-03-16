@@ -4,7 +4,7 @@
 %>
 <% content_for :head do %>
     <%#javascript_include_tag "jquery.history.js" %>
-    <script src="//yandex.st/dojo/1.8.1/dojo/dojo.js"></script> 
+    <script src="//yandex.st/dojo/1.8.1/dojo/dojo.js"></script>
 <% end %>
 <%
    items = @order.line_items.map do |item|
@@ -27,7 +27,7 @@
     <% service.language @payment_method.provider_class.language_code(I18n.locale) %>
     <% #Ds_Merchant_UrlKO
        #service.failure_url edit_order_checkout_url(@order, :state => 'payment')
-       service.failure_url checkout_state_path(@order.checkout_steps.third)
+       service.failure_url (spree.root_url+checkout_state_path(@order.checkout_steps.third))
     %>
     <% #Ds_Merchant_UrlOK
        service.success_url sermepa_confirm_order_checkout_url(@order, :payment_method_id => @payment_method)
@@ -36,7 +36,7 @@
        service.notify_url sermepa_notify_order_checkout_url(@order, :payment_method_id => @payment_method)
     %>
     <%= #Sermepa doesn't accept utf-8 charset
-        submit_tag "Go to payment gateway!", :class => 'clear'%>
+        submit_tag "Go to payment gateway!", :class => 'clear', :style => 'display:none;'%>
 <%end%>
 <% content_for :head do %>
 <script>
@@ -62,7 +62,7 @@
 
         //     // Change our States
         //     History.pushState({state:1}, "<%= Spree::Config[:site_name] %>", "<%= edit_order_checkout_url(@order, :state => 'payment')%>"); // logs {state:1}, "State 1", "?state=1"
-        //     //History.pushState({state:2}, "<%= Spree::Config[:site_name] %>", "<%= edit_order_checkout_url(@order, :state => 'payment')%>"); // logs {state:2}, "State 2", "?state=2"
+        //     History.pushState({state:2}, "<%= Spree::Config[:site_name] %>", "<%= edit_order_checkout_url(@order, :state => 'payment')%>"); // logs {state:2}, "State 2", "?state=2"
     //});
 
     dojo.ready(function(){
