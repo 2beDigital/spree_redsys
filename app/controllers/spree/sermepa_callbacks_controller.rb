@@ -11,7 +11,7 @@ module Spree
       notify = ActiveMerchant::Billing::Integrations::Sermepa.notification(request.query_parameters)
       @order ||= Spree::Order.find_by_number! (params[:order_id])
       notify_acknowledge = notify.acknowledge(sermepa_credentials(payment_method))
-      puts 'notify_acknowledge: ' + notify_acknowledge.to_s
+      logger.info 'notify_acknowledge :' + notify_acknowledge.to_s
       if notify_acknowledge
         #TODO add source to payment
         unless @order.state == "complete"
@@ -20,6 +20,7 @@ module Spree
           payment_upgrade
         end
         @payment = Spree::Payment.find_by_order_id(@order)
+        logger.info 'notify.complete? :' + notify.complete?.to_s
         @payment.complete! if notify.complete?
       else
         @order.payments.destroy_all
