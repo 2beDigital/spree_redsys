@@ -5,7 +5,7 @@ module Spree
     # Receive a direct notification from the gateway
     def sermepa_notify
       notify = ActiveMerchant::Billing::Integrations::Sermepa.notification(request.query_parameters)
-      @order ||= Order.find_by_number! ('R'+ params['ds_order'][1..9])
+      @order ||= Order.find_by_number! (params[:order_id])
       notify_acknowledge = notify.acknowledge(sermepa_credentials(payment_method))
       if notify_acknowledge
         #TODO add source to payment
@@ -14,26 +14,29 @@ module Spree
           order_upgrade
           payment_upgrade
         end
-        payment = Spree::Payment.find_by_order_id(@order)
-        payment.complete! if notify.complete?
+        @payment = Spree::Payment.find_by_order_id(@order)
+        @payment.complete! if notify.complete?
       else
         @order.payments.destroy_all
-        payment = @order.payments.create({:amount => @order.total,
+        @payment = @order.payments.create({:amount => @order.total,
                                            :source_type => 'Spree:SermepaCreditCard',
                                            :payment_method => payment_method,
                                            :state => 'processing',
                                            :response_code => notify.error_code,
                                            :avs_response => notify.error_message[0..255]},
-                                          :without_protection => true)
-        payment.failure!
+                                           :without_protection => true)
+        #@payment.failure!
       end
+      render :nothing => true
     end
 
     # Handle the incoming user
     def sermepa_confirm
       load_order
-      order_upgrade()
-      payment_upgrade()
+      unless @order.state == "complete"
+        order_upgrade()
+        payment_upgrade()
+      end
       flash[:notice] = I18n.t(:order_processed_successfully)
       redirect_to completion_route
     end

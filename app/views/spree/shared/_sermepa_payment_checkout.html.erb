@@ -1,6 +1,10 @@
 <%
    require 'active_merchant/billing/integrations/action_view_helper'
    ActionView::Base.send(:include, ActiveMerchant::Billing::Integrations::ActionViewHelper)
+
+   if @payment_method.kind_of?(Spree::BillingIntegration::SermepaPayment) && @payment_method.environment.to_s.include?('development')
+        ActiveMerchant::Billing::Base.integration_mode = :test
+   end
 %>
 <% content_for :head do %>
     <%#javascript_include_tag "jquery.history.js" %>
@@ -26,11 +30,13 @@
     <% service.customer_name "#{@order.ship_address.firstname} #{@order.ship_address.lastname}"%>
     <% service.language @payment_method.provider_class.language_code(I18n.locale) %>
     <% #Ds_Merchant_UrlKO
-       #service.failure_url edit_order_checkout_url(@order, :state => 'payment')
-       service.failure_url (spree.root_url+checkout_state_path(@order.checkout_steps.third))
+       service.failure_url edit_order_checkout_url(@order, :state => 'payment')
+       # Problems: add locale twice. service.failure_url (spree.root_url+checkout_state_path(@order.checkout_steps.third))
     %>
     <% #Ds_Merchant_UrlOK
-       service.success_url sermepa_confirm_order_checkout_url(@order, :payment_method_id => @payment_method)
+       #service.success_url sermepa_confirm_order_checkout_url(@order, :payment_method_id => @payment_method)
+       service.success_url order_url(@order)
+
     %>
     <% #Ds_Merchant_MerchantURL
        service.notify_url sermepa_notify_order_checkout_url(@order, :payment_method_id => @payment_method)
