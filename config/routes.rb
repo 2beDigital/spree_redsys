@@ -9,7 +9,16 @@ Spree::Core::Engine.routes.draw do
         post :sermepa_notify
       end
     end
+
+    resource :sermepa_callbacks, :controller => 'sermepa_callbacks' do
+      member do
+        post :sermepa_notify
+      end
+    end
   end
+
+  #match '/sermepa_notify' => 'sermepa_callbacks#notify', :via => [:get, :post]
+
 end
 
 

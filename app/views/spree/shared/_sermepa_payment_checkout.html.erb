@@ -39,7 +39,8 @@
 
     %>
     <% #Ds_Merchant_MerchantURL
-       service.notify_url sermepa_notify_order_checkout_url(@order, :payment_method_id => @payment_method)
+       #service.notify_url sermepa_notify_order_checkout_url(@order, :payment_method_id => @payment_method)
+       service.notify_url sermepa_notify_order_sermepa_callbacks_url(@order, :payment_method_id => @payment_method)
     %>
     <%= #Sermepa doesn't accept utf-8 charset
         submit_tag "Go to payment gateway!", :class => 'clear', :style => 'display:none;'%>
