@@ -1,6 +1,5 @@
 module Spree
   class SermepaCallbacksController < Spree::BaseController
-    include ActiveMerchant::Billing::Integrations
 
     skip_before_filter :verify_authenticity_token
 
@@ -8,33 +7,22 @@ module Spree
 
     # Receive a direct notification from the gateway
     def sermepa_notify
-      notify = ActiveMerchant::Billing::Integrations::Sermepa.notification(request.query_parameters)
       @order ||= Spree::Order.find_by_number! (params[:order_id])
-      notify_acknowledge = notify.acknowledge(sermepa_credentials(payment_method))
-      logger.info 'notify_acknowledge :' + notify_acknowledge.to_s
+      notify_acknowledge = acknowledgeSignature(sermepa_credentials(payment_method))
       if notify_acknowledge
         #TODO add source to payment
         unless @order.state == "complete"
           @order.payments.destroy_all
           order_upgrade
-          payment_upgrade
+          payment_upgrade(params)
         end
         @payment = Spree::Payment.find_by_order_id(@order)
-        logger.info 'notify.complete? :' + notify.complete?.to_s
-        @payment.complete! if notify.complete?
+        @payment.complete!
       else
         @order.payments.destroy_all
-        @payment = @order.payments.create({:amount => @order.total,
-                                          :source_type => 'Spree:SermepaCreditCard',
-                                          :payment_method => payment_method,
-                                          :state => 'processing',
-                                          :response_code => notify.error_code,
-                                          :avs_response => notify.error_message[0..255]},
-                                          :without_protection => true)
+        @payment = payment_upgrade(params)
       end
-
       render :nothing => true
-
     end
 
 
@@ -47,23 +35,21 @@ module Spree
       }
     end
 
-    def payment_upgrade
-      #payment_method = Spree::PaymentMethod.find_by_type("Spree::BillingIntegration::SermepaPayment")
+    def payment_upgrade (params)
       payment = @order.payments.create({:amount => @order.total,
                                         :source_type => 'Spree:SermepaCreditCard',
-                                        :payment_method => payment_method },
-                                       :without_protection => true)
+                                        :payment_method => payment_method,
+                                        :response_code => params['Ds_Response'].to_s,
+                                        :avs_response => params['Ds_AuthorisationCode'].to_s},
+                                        :without_protection => true)
       payment.started_processing!
-      payment.pend!
     end
 
-    # create the gateway from the supplied options
+
     def payment_method
       @payment_method ||= Spree::PaymentMethod.find(params[:payment_method_id])
       @payment_method ||= Spree::PaymentMethod.find_by_type("Spree::BillingIntegration::SermepaPayment")
     end
-
-
 
     def order_upgrade
       ## TODO refactor coz u don't need really @order.state = "payment"
@@ -81,6 +67,27 @@ module Spree
 
       @order.finalize!
     end
+
+    def acknowledgeSignature(credentials = nil)
+      return false if params['Ds_Signature'].blank?
+      str =
+          params['Ds_Amount'].to_s +
+              params['Ds_Order'].to_s +
+              params['Ds_MerchantCode'].to_s +
+              params['Ds_Currency'].to_s +
+              params['Ds_Response'].to_s
+      str += credentials[:secret_key]
+      sig = Digest::SHA1.hexdigest(str)
+      msg =
+          "sermepa_notify: Hour " +
+          params['Ds_Hour'].to_s  +
+          ", order_id: " + params[:order_id].to_s +
+          "signature: " + sig.upcase + "Ds_Signature " + params['Ds_Signature'].to_s
+      logger.info  "#{msg}"
+      logger.debug "#{msg}"
+      sig.upcase == params['Ds_Signature'].to_s.upcase
+    end
+
 
   end
 end
