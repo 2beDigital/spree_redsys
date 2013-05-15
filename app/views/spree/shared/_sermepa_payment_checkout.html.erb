@@ -34,8 +34,8 @@
        # Problems: add locale twice. service.failure_url (spree.root_url+checkout_state_path(@order.checkout_steps.third))
     %>
     <% #Ds_Merchant_UrlOK
-       #service.success_url sermepa_confirm_order_checkout_url(@order, :payment_method_id => @payment_method)
-       service.success_url order_url(@order)
+       service.success_url sermepa_confirm_order_checkout_url(@order, :payment_method_id => @payment_method)
+       #service.success_url order_url(@order)
 
     %>
     <% #Ds_Merchant_MerchantURL

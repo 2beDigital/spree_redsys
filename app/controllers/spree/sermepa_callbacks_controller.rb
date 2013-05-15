@@ -67,7 +67,8 @@ module Spree
     end
 
     def acknowledgeSignature(credentials = nil)
-      return false if params['Ds_Signature'].blank?
+      return false if (params['Ds_Response'].blank? &&
+          params['Ds_Response'].to_s != "0000")
       str =
           params['Ds_Amount'].to_s +
               params['Ds_Order'].to_s +
@@ -80,8 +81,7 @@ module Spree
           "sermepa_notify: Hour " +
           params['Ds_Hour'].to_s  +
           ", order_id: " + params[:order_id].to_s +
-          "signature: " + sig.upcase + "---- Ds_Signature " + params['Ds_Signature'].to_s
-      logger.info  "#{msg}"
+          "signature: " + sig.upcase + " ---- Ds_Signature " + params['Ds_Signature'].to_s
       logger.debug "#{msg}"
       sig.upcase == params['Ds_Signature'].to_s.upcase
     end
