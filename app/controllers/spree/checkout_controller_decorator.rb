@@ -2,13 +2,6 @@ module Spree
   Spree::CheckoutController.class_eval do
     before_filter :redirect_to_sermepa_form_if_needed, :only => [:update]
 
-    # Handle the incoming user
-    def sermepa_confirm
-      @order ||= Spree::Order.find_by_number!(params[:order_id])
-      flash[:notice] = I18n.t(:order_processed_successfully)
-      redirect_to order_url(@order)
-    end
-
     private
 
     def redirect_to_sermepa_form_if_needed

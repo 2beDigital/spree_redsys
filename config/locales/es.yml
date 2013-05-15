@@ -1,5 +1,5 @@
 # Sample localization file for English. Add more files in this directory for other locales.
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
-en:
-  order_processed_successfully: "Your order has been processed successfully. Thank you for your purchase!"
+es:
+  order_processed_successfully: "Su pedido se ha procesado correctamente. Gracias por su compra!!"

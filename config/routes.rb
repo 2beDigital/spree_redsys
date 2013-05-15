@@ -5,8 +5,6 @@ Spree::Core::Engine.routes.draw do
       member do
         get :sermepa_checkout
         get :sermepa_payment
-        get :sermepa_confirm
-        post :sermepa_notify
       end
     end
 
@@ -14,6 +12,8 @@ Spree::Core::Engine.routes.draw do
       member do
         post :sermepa_notify
         #get :sermepa_notify
+        #get :sermepa_confirm
+        post :sermepa_confirm
       end
     end
   end

@@ -26,6 +26,14 @@ module Spree
     end
 
 
+    # Handle the incoming user
+    def sermepa_confirm
+      @order ||= Spree::Order.find_by_number!(params[:order_id])
+      flash[:notice] = I18n.t(:order_processed_successfully)
+      redirect_to order_url(@order)
+    end
+
+
     def sermepa_credentials (payment_method)
       {
           :terminal_id   => payment_method.preferred_terminal_id,
