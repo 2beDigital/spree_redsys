@@ -7,7 +7,7 @@ module Spree
 
     # Receive a direct notification from the gateway
     def sermepa_notify
-      @order ||= Spree::Order.find_by_number! (params[:order_id])
+      @order ||= Spree::Order.find_by_number!(params[:order_id])
       notify_acknowledge = acknowledgeSignature(sermepa_credentials(payment_method))
       if notify_acknowledge
         #TODO add source to payment
