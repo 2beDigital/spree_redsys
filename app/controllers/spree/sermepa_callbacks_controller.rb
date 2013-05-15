@@ -75,7 +75,7 @@ module Spree
     end
 
     def acknowledgeSignature(credentials = nil)
-      return false if (params['Ds_Response'].blank? &&
+      return false if (params['Ds_Response'].blank? ||
           params['Ds_Response'].to_s != "0000")
       str =
           params['Ds_Amount'].to_s +
