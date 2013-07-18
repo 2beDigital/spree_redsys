@@ -1,5 +1,6 @@
 <!--
   insert_bottom '.payment-info'
+
 -->
 <% order.payments.each do |payment| %>
     <% if payment.source_type.to_s.include?('Sermepa') %>
