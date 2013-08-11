@@ -29,9 +29,11 @@ module Spree
     # Handle the incoming user
     def sermepa_confirm
       @order ||= Spree::Order.find_by_number!(params[:order_id])
+      # Unset the order id as it's completed.
+      session[:order_id] = nil
       flash[:notice] = I18n.t(:order_processed_successfully)
       flash[:commerce_tracking] = "true"
-      redirect_to order_url(@order)
+      redirect_to order_path(@order)
     end
 
 
