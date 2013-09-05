@@ -1,0 +1,86 @@
+<%
+   require 'active_merchant/billing/integrations/action_view_helper'
+   ActionView::Base.send(:include, ActiveMerchant::Billing::Integrations::ActionViewHelper)
+
+   if @payment_method.kind_of?(Spree::BillingIntegration::CecaPayment) && @payment_method.environment.to_s.include?('development')
+        ActiveMerchant::Billing::Base.integration_mode = :test
+   end
+%>
+<% content_for :head do %>
+    <%#javascript_include_tag "jquery.history.js" %>
+    <script src="//yandex.st/dojo/1.8.5/dojo/dojo.js"></script>
+<% end %>
+<%
+   items = @order.line_items.map do |item|
+     price = (item.price * 100).to_i # convert for gateway
+     { t(:name)        => item.variant.product.name,
+       t(:description) => (item.variant.product.description[0..20]+"..." if item.variant.product.description),
+       t(:qty)    => item.quantity
+     }
+   end
+
+   #Order number starts with R (it's not allowed by sermepa) and to change the order every time we add a time Stamp afterwards
+   order_number =  @order.number[1..9]
+   order_number += Time.now.strftime("%M%S")[1..3]
+%>
+
+<%= #form required :charset => "ISO-8859-1", Spree::Config[:site_name]
+    payment_service_for order_number, Spree::Config[:site_name] ,:amount => (@payment_method.amount_in_cents(@order.total)), :currency => @payment_method.preferred_currency, :service => :ceca do |service| %>
+    <% service.description  items.to_s[0..999].gsub(/({|")/,'').gsub(/}/,"\n") %>
+    <% service.customer_name "#{@order.ship_address.firstname} #{@order.ship_address.lastname}"%>
+    <% service.language @payment_method.provider_class.language_code(I18n.locale) %>
+    <% #URL_OK
+       service.success_url ceca_confirm_order_ceca_callbacks_url(@order, :payment_method_id => @payment_method)
+    %>
+    <% #URL_NOK
+       service.failure_url edit_order_checkout_url(@order, :state => 'payment')
+    %>
+    <% #Ds_Merchant_MerchantURL Configure in CECA Console
+    %>
+    <%= hidden_field_tag 'Cifrado', 'SHA1' %>
+    <%= hidden_field_tag 'Pago_soportado', 'SSL' %>
+    <%= #Sermepa doesn't accept utf-8 charset
+        submit_tag "Go to payment gateway!", :class => 'clear', :style => 'display:none;'%>
+<%end%>
+<% content_for :head do %>
+<script>
+    var back_url = "<%= edit_order_checkout_url(@order, :state => 'payment')%>";
+
+    // First try with Hitory.js, https://github.com/balupton/History.js/ not succeed
+    //$(document).ready(function() {
+
+        // (function(window,undefined){
+
+        //     // Prepare
+        //     var History = window.History; // Note: We are using a capital H instead of a lower h
+        //     if ( !History.enabled ) {
+        //         // History.js is disabled for this browser.
+        //         // This is because we can optionally choose to support HTML4 browsers or not.
+        //         return false;
+        //     }
+        //     // Bind to StateChange Event
+        //     History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
+        //         var State = History.getState(); // Note: We are using History.getState() instead of event.state
+        //         History.log(State.data, State.title, State.url);
+        //     });
+
+        //     // Change our States
+        //     History.pushState({state:1}, "<%= Spree::Config[:site_name] %>", "<%= edit_order_checkout_url(@order, :state => 'payment')%>"); // logs {state:1}, "State 1", "?state=1"
+        //     History.pushState({state:2}, "<%= Spree::Config[:site_name] %>", "<%= edit_order_checkout_url(@order, :state => 'payment')%>"); // logs {state:2}, "State 2", "?state=2"
+    //});
+
+    dojo.ready(function(){
+      // We use dojo hash to control browser history in case of back button is pressed; only affects firefox and opera, pending ie test
+      require(["dojo/hash"], function(hash){
+          var currentHash = hash();          
+          if (currentHash) { document.location.href = back_url; return; }
+          hash(back_url, true);
+          document.forms[0].acceptCharset = "ISO-8859-1";
+          document.forms[0].submit();
+      });
+    });
+
+</script>
+<% end %>
+
+

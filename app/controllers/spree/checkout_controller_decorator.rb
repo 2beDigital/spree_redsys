@@ -22,6 +22,11 @@ module Spree
         @payment_method.provider_class::Helper.credentials = sermepa_credentials(payment_method)
         #set_cache_buster
         render 'spree/shared/_sermepa_payment_checkout', :layout => 'spree_sermepa_application'
+      else @payment_method.kind_of?(Spree::BillingIntegration::CecaPayment)
+
+        @payment_method.provider_class::Helper.credentials = ceca_credentials(payment_method)
+
+        render 'spree/shared/_ceca_payment_checkout', :layout => 'spree_sermepa_application'
       end
     end
 
@@ -33,6 +38,17 @@ module Spree
           :key_type      => payment_method.preferred_key_type
       }
     end
+
+    def ceca_credentials (payment_method)
+      {
+          :AcquirerBIN   => payment_method.preferred_AcquirerBIN,
+          :MerchantID    => payment_method.preferred_MerchantID,
+          :TerminalID    => payment_method.preferred_TerminalID,
+          :secret_key    => payment_method.preferred_secret_key,
+          :key_type      => payment_method.preferred_key_type
+      }
+    end
+
 
     def user_locale
       I18n.locale.to_s

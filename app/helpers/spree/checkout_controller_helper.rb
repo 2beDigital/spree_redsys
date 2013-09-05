@@ -1,2 +1,0 @@
-module Spree::CheckoutControllerHelper
-end

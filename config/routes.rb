@@ -16,9 +16,17 @@ Spree::Core::Engine.routes.draw do
         post :sermepa_confirm
       end
     end
+
+    resource :ceca_callbacks, :controller => 'ceca_callbacks' do
+      member do
+        get :ceca_confirm
+        post :ceca_confirm
+      end
+    end
+
   end
 
-  #match '/sermepa_notify' => 'sermepa_callbacks#notify', :via => [:get, :post]
+  match '/ceca_notify' => 'ceca_callbacks#ceca_notify', :via => [:get, :post]
 
 end
 

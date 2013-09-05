@@ -21,8 +21,12 @@ module SpreeSermepa
 
     initializer "spree_sermepa.register.payment_methods", :after => 'spree.register.payment_methods' do |app|
       app.config.spree.payment_methods += [
-          Spree::BillingIntegration::SermepaPayment
+          Spree::BillingIntegration::SermepaPayment,
+          Spree::BillingIntegration::CecaPayment
       ]
     end
+
   end
 end
+
+
