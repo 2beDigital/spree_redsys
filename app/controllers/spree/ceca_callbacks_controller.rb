@@ -50,10 +50,10 @@ module Spree
 
     def payment_upgrade (params)
       payment = @order.payments.create({:amount => @order.total,
-                                        :source_type => 'Spree:cecaCreditCard',
+                                        :source_type => 'Spree:CecaCreditCard',
                                         :payment_method => payment_method,
-                                        :response_code => params['Num_aut'].to_s,
-                                        :avs_response => params['COD_AUT'].to_s},
+                                        :response_code => params[:Num_aut].to_s,
+                                        :avs_response => params[:Referencia].to_s},
                                         :without_protection => true)
       payment.started_processing!
     end
