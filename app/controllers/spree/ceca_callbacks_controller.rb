@@ -79,18 +79,18 @@ module Spree
     end
 
     def acknowledgeSignature(credentials = nil)
-      return false if (params['TerminalID'].blank? ||
-          params['TerminalID'].to_s != "00000003")
+      return false if (params[:TerminalID].blank? ||
+          params[:TerminalID].to_s != "00000003")
       str =
           credentials[:secret_key] +
-          params['MerchantID'].to_s +
-              params['AcquirerBIN'].to_s +
-              params['TerminalID'].to_s +
-              params['Num_operacion'].to_s +
-              params['Importe'].to_s +
-              params['TipoMoneda+'].to_s +
-              params['Exponente'].to_s +
-              params['Referencia'].to_s
+          params[:MerchantID].to_s +
+              params[:AcquirerBIN].to_s +
+              params[:TerminalID].to_s +
+              params[:Num_operacion].to_s +
+              params[:Importe].to_s +
+              params[:TipoMoneda].to_s +
+              params[:Exponente].to_s +
+              params[:Referencia].to_s
       sig = Digest::SHA1.hexdigest(str)
       msg =
           "ceca_notify: Hour " +
@@ -98,7 +98,7 @@ module Spree
           ", order_id: R" + params[:Num_operacion][0..8].to_s +
           "signature: " + sig.upcase + " ---- Ds_Signature " + params['Firma'].to_s
       logger.debug "#{msg}"
-      sig.upcase == params['Firma'].to_s.upcase
+      sig.upcase == params[:Firma].to_s.upcase
     end
 
 
