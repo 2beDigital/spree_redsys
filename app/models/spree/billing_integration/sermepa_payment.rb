@@ -1,12 +1,11 @@
   class Spree::BillingIntegration::SermepaPayment < Spree::BillingIntegration
     preference :commercial_id, :string
-    preference :notify_url, :string, :default => 'https://sis-t.sermepa.es:25443/sis/realizarPago'
     preference :terminal_id, :integer, :default => 1
     preference :currency, :string, :default => 'EUR'
     preference :secret_key, :string
     preference :key_type, :string, :default => 'sha1_extended' #sabadell is sha1_extended but can be sha1_complete
 
-    attr_accessible :preferred_commercial_id, :preferred_notify_url, :preferred_terminal_id, :preferred_currency,
+    attr_accessible :preferred_commercial_id, :preferred_terminal_id, :preferred_currency,
                     :preferred_secret_key, :preferred_key_type, :preferred_server, :preferred_test_mode
 
     def provider_class
