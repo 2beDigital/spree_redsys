@@ -17,16 +17,24 @@ module Spree
       load_order
       @payment_method = Spree::PaymentMethod.find(params[:order][:payments_attributes].first[:payment_method_id])
 
+      ## Fixing double payment creation ##
+      if @payment_method.kind_of?(Spree::PaymentMethod::Check) ||
+         @payment_method.kind_of?(Spree::BillingIntegration::SermepaPayment) ||
+         @payment_method.kind_of?(Spree::BillingIntegration::CecaPayment)
+        @order.payments.destroy_all
+      end
+
       if @payment_method.kind_of?(Spree::BillingIntegration::SermepaPayment)
 
         @payment_method.provider_class::Helper.credentials = sermepa_credentials(payment_method)
         #set_cache_buster
         render 'spree/shared/_sermepa_payment_checkout', :layout => 'spree_sermepa_application'
-      else @payment_method.kind_of?(Spree::BillingIntegration::CecaPayment)
+      else if @payment_method.kind_of?(Spree::BillingIntegration::CecaPayment)
 
-        @payment_method.provider_class::Helper.credentials = ceca_credentials(payment_method)
+            @payment_method.provider_class::Helper.credentials = ceca_credentials(payment_method)
 
-        render 'spree/shared/_ceca_payment_checkout', :layout => 'spree_sermepa_application'
+            render 'spree/shared/_ceca_payment_checkout', :layout => 'spree_sermepa_application'
+          end
       end
     end
 

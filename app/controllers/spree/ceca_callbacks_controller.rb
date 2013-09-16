@@ -13,14 +13,12 @@ module Spree
       if notify_acknowledge
         #TODO add source to payment
         unless @order.state == "complete"
-          @order.payments.destroy_all
           order_upgrade
           payment_upgrade(params)
         end
         @payment = Spree::Payment.find_by_order_id(@order)
         @payment.complete!
       else
-        @order.payments.destroy_all
         @payment = payment_upgrade(params)
       end
       render :nothing => true
