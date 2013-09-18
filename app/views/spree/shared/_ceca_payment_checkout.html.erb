@@ -26,7 +26,7 @@
 
 <%= #form required :charset => "ISO-8859-1", Spree::Config[:site_name]
     payment_service_for order_number, Spree::Config[:site_name] ,:amount => (@payment_method.amount_in_cents(@order.total)), :currency => @payment_method.preferred_currency, :service => :ceca do |service| %>
-    <% service.description  items.to_s[0..999].gsub(/({|")/,'').gsub(/}/,"\n") %>
+    <% service.description  items.to_s[0..999].gsub(/({|")/,'').gsub(/}/,"\n").gsub("=>",": ").gsub("[","").gsub("]","") %>
     <% service.customer_name "#{@order.ship_address.firstname} #{@order.ship_address.lastname}"%>
     <% service.language @payment_method.provider_class.language_code(I18n.locale) %>
     <% #URL_OK
@@ -75,8 +75,8 @@
           var currentHash = hash();          
           if (currentHash) { document.location.href = back_url; return; }
           hash(back_url, true);
-          document.forms[0].acceptCharset = "ISO-8859-1";
-          document.forms[0].submit();
+          //document.forms[0].acceptCharset = "ISO-8859-1";
+          //document.forms[0].submit();
       });
     });
 
