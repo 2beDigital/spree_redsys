@@ -79,7 +79,7 @@
           var currentHash = hash();          
           if (currentHash) { document.location.href = back_url; return; }
           hash(back_url, true);
-          //document.forms[0].acceptCharset = "ISO-8859-1";
+          document.forms[0].acceptCharset = "ISO-8859-1";
           document.forms[0].submit();
       });
     });
