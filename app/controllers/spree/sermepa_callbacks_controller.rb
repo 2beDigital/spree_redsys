@@ -3,7 +3,7 @@ module Spree
 
     skip_before_filter :verify_authenticity_token
 
-    ssl_required
+    #ssl_required
 
     # Receive a direct notification from the gateway
     def sermepa_notify
