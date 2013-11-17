@@ -1,7 +1,7 @@
 SpreeSermepa
 ============
 
-Basic support for the Spanish SERMEPA “TPV Virtual” Spree::BillingIntegration,  Spree 1.1.3 compatible
+Basic support for the Spanish SERMEPA “TPV Virtual” Spree::BillingIntegration,  Spree 1.3.X compatible
 
 Based on https://github.com/samlown/active_merchant Library by @samlown
 Following the integration examples: https://github.com/spree/spree_paypal_express 
