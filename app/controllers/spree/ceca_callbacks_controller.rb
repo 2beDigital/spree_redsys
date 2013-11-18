@@ -28,6 +28,9 @@ module Spree
     # Handle the incoming user
     def ceca_confirm
       @order ||= Spree::Order.find_by_number!(params[:order_id])
+      unless @order.state == "complete"
+        order_upgrade()
+      end
       # Unset the order id as it's completed.
       session[:order_id] = nil
       flash[:notice] = I18n.t(:order_processed_successfully)
