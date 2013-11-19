@@ -13,8 +13,8 @@ module Spree
         #TODO add source to payment
         unless @order.state == "complete"
           order_upgrade
-          payment_upgrade(params)
         end
+        payment_upgrade(params)
         @payment = Spree::Payment.find_by_order_id(@order)
         @payment.complete!
       else
