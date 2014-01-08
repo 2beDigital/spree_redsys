@@ -1,12 +1,9 @@
-<!-- insert_after 'code:contains("button_link_to t(:continue)")'
+<!-- insert_after 'erb:contains("button_link_to Spree.t(:continue)")'
 -->
-
 <div class="filter-actions actions" data-hook="admin_order_edit_manual">
     <br><br><br>
-    <label for="manual_admin_advert"><%= t(:manual_admin_advert) %></label>
-
-  <%= link_to t(:complete), process_admin_order_manual_order_upgrade_path(:state_to => @order.checkout_steps.last), :class => 'button icon-save' %>
-  <%= link_to t(:finalize), process_admin_order_manual_order_upgrade_path(:state_to => @order.checkout_steps.last, :mail_order_confirmation => true), :class => 'button icon-envelope' %>
-  <%= link_to  t(:undo) + " " + t(:complete), process_admin_order_manual_order_upgrade_path(:state_to => @order.checkout_steps.first), :class => 'button icon-envelope' %>
-
+    <label for="manual_admin_advert"><%= t(:manual_admin_advert) %></label><br><br>
+  <%= link_to Spree.t(:complete), process_admin_order_manual_order_upgrade_path(:state_to => @order.checkout_steps.last), :class => 'button icon-save' %>&nbsp;
+  <%= link_to Spree.t(:finalize), process_admin_order_manual_order_upgrade_path(:state_to => @order.checkout_steps.last, :mail_order_confirmation => true), :class => 'button icon-envelope' %>&nbsp;
+  <%= link_to  Spree.t(:undo) + " " + Spree.t(:complete), process_admin_order_manual_order_upgrade_path(:state_to => @order.checkout_steps.first), :class => 'button icon-envelope' %>
 </div>

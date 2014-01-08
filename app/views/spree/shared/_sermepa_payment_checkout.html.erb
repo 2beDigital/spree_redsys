@@ -2,7 +2,8 @@
    require 'active_merchant/billing/integrations/action_view_helper'
    ActionView::Base.send(:include, ActiveMerchant::Billing::Integrations::ActionViewHelper)
 
-   if @payment_method.kind_of?(Spree::BillingIntegration::SermepaPayment) && @payment_method.environment.to_s.include?('development')
+   if @payment_method.kind_of?(Spree::BillingIntegration::SermepaPayment) &&
+           ( @payment_method.environment.to_s.include?('development') || @payment_method.preferred_test_mode )
         ActiveMerchant::Billing::Base.integration_mode = :test
    end
 %>

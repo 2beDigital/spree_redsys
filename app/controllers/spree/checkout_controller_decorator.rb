@@ -26,12 +26,12 @@ module Spree
 
       if @payment_method.kind_of?(Spree::BillingIntegration::SermepaPayment)
 
-        @payment_method.provider_class::Helper.credentials = sermepa_credentials(payment_method)
+        @payment_method.provider_class::Helper.credentials = sermepa_credentials(@payment_method)
         #set_cache_buster
         render 'spree/shared/_sermepa_payment_checkout', :layout => 'spree_sermepa_application'
       else if @payment_method.kind_of?(Spree::BillingIntegration::CecaPayment)
 
-            @payment_method.provider_class::Helper.credentials = ceca_credentials(payment_method)
+            @payment_method.provider_class::Helper.credentials = ceca_credentials(@payment_method)
 
             render 'spree/shared/_ceca_payment_checkout', :layout => 'spree_sermepa_application'
           end
