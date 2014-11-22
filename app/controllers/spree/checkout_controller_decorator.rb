@@ -14,7 +14,7 @@ module Spree
         end
       end
 
-      load_order
+      load_order_with_lock
       @payment_method = Spree::PaymentMethod.find(params[:order][:payments_attributes].first[:payment_method_id])
 
       ## Fixing double payment creation ##
