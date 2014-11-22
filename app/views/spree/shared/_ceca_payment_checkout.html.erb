@@ -8,8 +8,7 @@
    end
 %>
 <% content_for :head do %>
-    <%#javascript_include_tag "jquery.history.js" %>
-    <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.5/dojo/dojo.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.8/dojo/dojo.js"></script>
 <% end %>
 <%
    items = @order.line_items.map do |item|
@@ -46,29 +45,6 @@
 <% content_for :head do %>
 <script>
     var back_url = "<%= edit_order_checkout_url(@order, :state => 'payment')%>";
-
-    // First try with Hitory.js, https://github.com/balupton/History.js/ not succeed
-    //$(document).ready(function() {
-
-        // (function(window,undefined){
-
-        //     // Prepare
-        //     var History = window.History; // Note: We are using a capital H instead of a lower h
-        //     if ( !History.enabled ) {
-        //         // History.js is disabled for this browser.
-        //         // This is because we can optionally choose to support HTML4 browsers or not.
-        //         return false;
-        //     }
-        //     // Bind to StateChange Event
-        //     History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
-        //         var State = History.getState(); // Note: We are using History.getState() instead of event.state
-        //         History.log(State.data, State.title, State.url);
-        //     });
-
-        //     // Change our States
-        //     History.pushState({state:1}, "<%= Spree::Config[:site_name] %>", "<%= edit_order_checkout_url(@order, :state => 'payment')%>"); // logs {state:1}, "State 1", "?state=1"
-        //     History.pushState({state:2}, "<%= Spree::Config[:site_name] %>", "<%= edit_order_checkout_url(@order, :state => 'payment')%>"); // logs {state:2}, "State 2", "?state=2"
-    //});
 
     dojo.ready(function(){
       // We use dojo hash to control browser history in case of back button is pressed; only affects firefox and opera, pending ie test
