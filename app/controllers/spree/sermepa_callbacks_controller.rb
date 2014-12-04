@@ -68,7 +68,7 @@ module Spree
       @order.state = "payment"
       @order.save
 
-      @order.update_attributes({:state => "complete", :completed_at => Time.now}, :without_protection => true)
+      @order.update(:state => "complete", :completed_at => Time.now)
 
       # Since we dont rely on state machine callback, we just explicitly call this method for spree_store_credits
       if @order.respond_to?(:consume_users_credit, true)

@@ -6,7 +6,7 @@ module ActiveMerchant #:nodoc:
       # this integrated payment method.
       module Ceca
 
-        autoload :Helper, 'active_merchant/billing/integrations/ceca/helper.rb'
+        eager_autoload :Helper, 'active_merchant/billing/integrations/ceca/helper.rb'
 
         mattr_accessor :service_test_url
         self.service_test_url = "http://tpv.ceca.es:8000/cgi-bin/tpv"

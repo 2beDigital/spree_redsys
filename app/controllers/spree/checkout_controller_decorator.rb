@@ -1,27 +1,23 @@
 module Spree
   Spree::CheckoutController.class_eval do
+    before_filter :apply_coupon_code
     before_filter :redirect_to_sermepa_form_if_needed, :only => [:update]
 
-    private
+    protected
 
     def redirect_to_sermepa_form_if_needed
       return unless (params[:state] == "payment")
       return unless params[:order][:payments_attributes]
 
-      if @order.update_attributes(object_params)
-        if params[:order][:coupon_code] and !params[:order][:coupon_code].blank? and @order.coupon_code.present?
-          fire_event('spree.checkout.coupon_code_added', :coupon_code => @order.coupon_code)
-        end
-      end
-
       load_order_with_lock
+      @order.update_from_params(params, permitted_checkout_attributes, request.headers.env)
       @payment_method = Spree::PaymentMethod.find(params[:order][:payments_attributes].first[:payment_method_id])
 
       ## Fixing double payment creation ##
       if @payment_method.kind_of?(Spree::PaymentMethod::Check) ||
          @payment_method.kind_of?(Spree::BillingIntegration::SermepaPayment) ||
          @payment_method.kind_of?(Spree::BillingIntegration::CecaPayment)
-        @order.payments.destroy_all
+         @order.payments.destroy_all
       end
 
       if @payment_method.kind_of?(Spree::BillingIntegration::SermepaPayment)
@@ -56,22 +52,6 @@ module Spree
           :key_type      => payment_method.preferred_key_type
       }
     end
-
-
-    def user_locale
-      I18n.locale.to_s
-    end
-
-    def sermepa_gateway
-      payment_method.provider
-    end
-
-    def set_cache_buster
-      response.headers["Cache-Control"] = "no-cache, no-store" #post-check=0, pre-check=0
-      response.headers["Pragma"] = "no-cache"
-      response.headers["Expires"] = "Fri, 01 Jan 1990 00:00:00 GMT"
-    end
-
 
   end
 

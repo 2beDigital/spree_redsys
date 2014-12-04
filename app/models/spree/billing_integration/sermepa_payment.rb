@@ -6,9 +6,6 @@
     preference :key_type, :string, :default => 'sha1_extended' #sabadell is sha1_extended but can be sha1_complete
     preference :notify_alternative_domain_url, :string #This can allow us cloudflare integration
 
-    attr_accessible :preferred_commercial_id, :preferred_terminal_id, :preferred_currency,
-                    :preferred_secret_key, :preferred_key_type, :preferred_server, :preferred_test_mode, :preferred_notify_alternative_domain_url
-
     def provider_class
       ActiveMerchant::Billing::Integrations::Sermepa
     end
