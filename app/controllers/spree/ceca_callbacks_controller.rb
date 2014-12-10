@@ -57,6 +57,8 @@ module Spree
                                         :avs_response => params[:Referencia].to_s},
                                         :without_protection => true)
       payment.started_processing!
+      payment.processing.record_response(params)
+      @order.update(:considered_risky => 0)
     end
 
 
@@ -65,17 +67,11 @@ module Spree
     end
 
     def order_upgrade
-      ## TODO refactor coz u don't need really @order.state = "payment"
-      @order.state = "payment"
-      @order.save
-
-      @order.update_attributes({:state => "complete", :completed_at => Time.now}, :without_protection => true)
-
+      @order.update(:state => "complete", :considered_risky => 1,  :completed_at => Time.now)
       # Since we dont rely on state machine callback, we just explicitly call this method for spree_store_credits
       if @order.respond_to?(:consume_users_credit, true)
         @order.send(:consume_users_credit)
       end
-
       @order.finalize!
     end
 
