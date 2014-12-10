@@ -10,6 +10,10 @@
       ActiveMerchant::Billing::Integrations::Sermepa
     end
 
+    def auto_capture?
+      false
+    end
+
     def payment_profiles_supported?
       false
     end
