@@ -13,7 +13,7 @@
 <%
    items = @order.line_items.map do |item|
      price = (item.price * 100).to_i # convert for gateway
-     { t(:name)        => item.variant.product.name,
+     { Spree.t(:name)        => item.variant.product.name,
        #Héctor Note 10/12/2014 Commeted to avoid html tags t(:description) => (item.variant.product.description[0..20]+"..." if item.variant.product.description),
        Spree.t(:qty)    => item.quantity
      }
