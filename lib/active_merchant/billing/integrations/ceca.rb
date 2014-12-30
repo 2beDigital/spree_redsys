@@ -5,8 +5,11 @@ module ActiveMerchant #:nodoc:
       # See the BbvaTpv::Helper class for more generic information on usage of
       # this integrated payment method.
       module Ceca
+        extend ActiveSupport::Autoload
 
-        eager_autoload :Helper, 'active_merchant/billing/integrations/ceca/helper.rb'
+        eager_autoload do
+          autoload :Helper, 'active_merchant/billing/integrations/ceca/helper.rb'
+        end
 
         mattr_accessor :service_test_url
         self.service_test_url = "http://tpv.ceca.es:8000/cgi-bin/tpv"
