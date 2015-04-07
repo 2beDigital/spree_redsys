@@ -1,6 +1,5 @@
 module Spree
   Spree::CheckoutController.class_eval do
-    before_filter :apply_coupon_code
     before_filter :redirect_to_sermepa_form_if_needed, :only => [:update]
 
     protected

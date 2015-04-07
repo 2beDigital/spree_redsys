@@ -32,9 +32,9 @@ module Spree
         order_upgrade()
       end
       # Unset the order id as it's completed.
-      session[:order_id] = nil
-      flash[:notice] = I18n.t(:order_processed_successfully)
-      flash[:commerce_tracking] = "true"
+      session[:order_id] = nil #deprecated from 2.3
+      flash.notice = Spree.t(:order_processed_successfully)
+      flash['order_completed'] = true
       redirect_to order_path(@order)
     end
 
