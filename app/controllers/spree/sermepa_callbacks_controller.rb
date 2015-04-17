@@ -48,14 +48,11 @@ module Spree
     end
 
     def payment_upgrade (params)
-      payment = @order.payments.create({:amount => @order.total,
-                                        :source_type => 'Spree:SermepaCreditCard',
+      payment = @order.payments.create!({:amount => @order.total,
                                         :payment_method => payment_method,
                                         :response_code => params['Ds_Response'].to_s,
-                                        :avs_response => params['Ds_AuthorisationCode'].to_s},
-                                        :without_protection => true)
+                                        :avs_response => params['Ds_AuthorisationCode'].to_s})
       payment.started_processing!
-      payment.processing.record_response(params)
       @order.update(:considered_risky => 0)
     end
 
