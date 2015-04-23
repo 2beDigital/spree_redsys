@@ -53,8 +53,7 @@ module Spree
       payment = @order.payments.create!({:amount => @order.total,
                                          :payment_method => payment_method,
                                          :response_code => params[:Num_aut].to_s,
-                                         :avs_response => params[:Referencia].to_s,
-                                         :without_protection => true})
+                                         :avs_response => params[:Referencia].to_s})
 
       payment.started_processing!
       @order.update(:considered_risky => 0)
