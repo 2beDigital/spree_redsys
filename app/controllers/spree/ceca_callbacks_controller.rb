@@ -15,11 +15,11 @@ module Spree
         unless @order.state == "complete"
           order_upgrade
         end
-        payment_upgrade(params)
+        payment_upgrade(params, true)
         @payment = Spree::Payment.find_by_order_id(@order)
         @payment.complete!
       else
-        @payment = payment_upgrade(params)
+        payment_upgrade(params, false)
       end
       render :nothing => true
     end
@@ -30,6 +30,7 @@ module Spree
       @order ||= Spree::Order.find_by_number!(params[:order_id])
       unless @order.state == "complete"
         order_upgrade()
+        payment_upgrade(params, false)
       end
       # Unset the order id as it's completed.
       session[:order_id] = nil #deprecated from 2.3
@@ -49,14 +50,14 @@ module Spree
       }
     end
 
-    def payment_upgrade (params)
+    def payment_upgrade (params, no_risky)
       payment = @order.payments.create!({:amount => @order.total,
                                          :payment_method => payment_method,
                                          :response_code => params[:Num_aut].to_s,
                                          :avs_response => params[:Referencia].to_s})
 
       payment.started_processing!
-      @order.update(:considered_risky => 0)
+      @order.update(:considered_risky => 0) if no_risky
     end
 
 
