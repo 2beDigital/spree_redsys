@@ -25,10 +25,16 @@
 %>
 
 <%= #form required :charset => "ISO-8859-1", Spree::Config[:site_name]
-    payment_service_for order_number, Spree::Config[:site_name] ,:amount => (@payment_method.amount_in_cents(@order.total)), :currency => @payment_method.preferred_currency, :service => :sermepa do |service| %>
-    <% service.description  items.to_s[0..120].gsub(/({|")/,'').gsub(/}/,"\n").gsub("=>",": ").gsub("[","(").gsub("]",")")  %>
-    <% service.customer_name "#{@order.ship_address.firstname} #{@order.ship_address.lastname}"%>
-    <% service.language @payment_method.provider_class.language_code(I18n.locale) %>
+    payment_service_for order_number, Spree::Config[:site_name], :amount => (@payment_method.amount_in_cents(@order.total)), :currency => @payment_method.preferred_currency, :service => :sermepa do |service| %>
+
+    <%# service.description  items.to_s[0..120].gsub(/({|")/,'').gsub(/}/,"\n").gsub("=>",": ").gsub("[","(").gsub("]",")")  %>
+    <%# service.customer_name "#{@order.ship_address.firstname} #{@order.ship_address.lastname}"%>
+    <%# service.language @payment_method.provider_class.language_code(I18n.locale) %>
+
+    <% #Ds_Signature
+       service.signature_256 @payment_method.preferred_key_type
+    %>
+
     <% #Ds_Merchant_UrlKO
        service.failure_url edit_order_checkout_url(@order, :state => 'payment')
     %>
@@ -58,7 +64,7 @@
           if (currentHash) { document.location.href = back_url; return; }
           hash(back_url, true);
           document.forms[0].acceptCharset = "ISO-8859-1";
-          document.forms[0].submit();
+          //document.forms[0].submit();
       });
     });
 

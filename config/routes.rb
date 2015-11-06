@@ -17,18 +17,9 @@ Spree::Core::Engine.routes.draw do
       end
     end
 
-    resource :ceca_callbacks, :controller => 'ceca_callbacks' do
-      member do
-        get :ceca_confirm
-        post :ceca_confirm
-      end
-    end
-
   end
 
-  match '/ceca_notify' => 'ceca_callbacks#ceca_notify', :via => [:get, :post]
-
-  namespace :admin do
+    namespace :admin do
     resources :orders do
       resource :manual_order_upgrade, :controller => 'manual_order_upgrade' do
         member do

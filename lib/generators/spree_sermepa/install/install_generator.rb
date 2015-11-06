@@ -1,4 +1,4 @@
-module SpreeSermepa
+module SpreeRedsys
   module Generators
     class InstallGenerator < Rails::Generators::Base
 

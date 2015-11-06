@@ -1,10 +1,10 @@
 module Spree
   Spree::CheckoutController.class_eval do
-    before_filter :redirect_to_sermepa_form_if_needed, :only => [:update]
+    before_filter :redirect_to_redsys_form_if_needed, :only => [:update]
 
     protected
 
-    def redirect_to_sermepa_form_if_needed
+    def redirect_to_redsys_form_if_needed
       return unless (params[:state] == "payment")
       return unless params[:order][:payments_attributes]
 
@@ -18,7 +18,7 @@ module Spree
 
       @payment_method.provider_class::Helper.credentials = redsys_credentials(@payment_method)
 
-      render 'spree/shared/_sermepa_payment_checkout', :layout => 'spree_redsys_application'
+      render 'spree/shared/_redsys_payment_checkout', :layout => 'spree_redsys_application'
 
     end
 

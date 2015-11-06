@@ -53,24 +53,24 @@ module ActiveMerchant #:nodoc:
           mapping :signature_256, 'Ds_Signature'
 
           ############# Traditional ############
-          mapping :account,     'Ds_Merchant_MerchantName'
+          #mapping :account,     'Ds_Merchant_MerchantName'
 
-          mapping :currency,    'Ds_Merchant_Currency'
-          mapping :amount,      'Ds_Merchant_Amount'
+          #mapping :currency,    'Ds_Merchant_Currency'
+          #mapping :amount,      'Ds_Merchant_Amount'
 
-          mapping :order,       'Ds_Merchant_Order'
-          mapping :description, 'Ds_Merchant_ProductDescription'
-          mapping :client,      'Ds_Merchant_Titular'
+          #mapping :order,       'Ds_Merchant_Order'
+          #mapping :description, 'Ds_Merchant_ProductDescription'
+          #mapping :client,      'Ds_Merchant_Titular'
 
           mapping :notify_url,  'Ds_Merchant_MerchantURL'
           mapping :success_url, 'Ds_Merchant_UrlOK'
           mapping :failure_url, 'Ds_Merchant_UrlKO'
 
-          mapping :language,    'Ds_Merchant_ConsumerLanguage'
+          #mapping :language,    'Ds_Merchant_ConsumerLanguage'
 
-          mapping :transaction_type, 'Ds_Merchant_TransactionType'
+          #mapping :transaction_type, 'Ds_Merchant_TransactionType'
 
-          mapping :customer_name, 'Ds_Merchant_Titular' 
+          #mapping :customer_name, 'Ds_Merchant_Titular'
 
           #### Special Request Specific Fields ####
           mapping :signature,   'Ds_Merchant_MerchantSignature'
@@ -81,9 +81,10 @@ module ActiveMerchant #:nodoc:
             self.credentials = options.delete(:credentials) if options[:credentials]
             super(order, account, options)
 
-            add_field 'Ds_Merchant_MerchantCode', credentials[:commercial_id]
+            #add_field 'Ds_Merchant_MerchantCode', credentials[:commercial_id]
+            #add_field 'Ds_Merchant_Terminal', credentials[:terminal_id]
             add_field 'Ds_Merchant_Terminal', credentials[:terminal_id]
-            #add_field mappings[:transaction_type], '0' # Default Transaction Type
+
             self.transaction_type = :authorization
           end
 

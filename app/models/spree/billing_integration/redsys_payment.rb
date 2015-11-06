@@ -3,7 +3,7 @@
     preference :terminal_id, :integer, :default => 1
     preference :currency, :string, :default => 'EUR'
     preference :secret_key, :string
-    preference :key_type, :string, :default => 'sha1_extended' #sabadell is sha1_extended but can be sha1_complete
+    preference :key_type, :string, :default => 'HMAC_SHA256_V1'
     preference :notify_alternative_domain_url, :string #This can allow us cloudflare integration
 
     def provider_class
