@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    spree_sermepa (1.2.3)
+    redsys_redsys (2.4)
       active_merchant_sermepa (>= 0.1.1)
       spree_core (>= 1.1.4)
 
@@ -227,5 +227,5 @@ DEPENDENCIES
   factory_girl (~> 2.6.4)
   ffaker
   rspec-rails (~> 2.9)
-  spree_sermepa!
+  redsys_redsys!
   sqlite3

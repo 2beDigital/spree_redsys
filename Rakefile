@@ -9,7 +9,7 @@ RSpec::Core::RakeTask.new
 
 task :default => [:spec]
 
-spec = eval(File.read('spree_sermepa.gemspec'))
+spec = eval(File.read('spree_redsys.gemspec'))
 
 Gem::PackageTask.new(spec) do |p|
   p.gem_spec = spec
@@ -24,6 +24,6 @@ end
 
 desc 'Generates a dummy app for testing'
 task :test_app do
-  ENV['LIB_NAME'] = 'spree_sermepa'
+  ENV['LIB_NAME'] = 'spree_redsys'
   Rake::Task['common:test_app'].invoke
 end

@@ -32,7 +32,6 @@ module ActiveMerchant #:nodoc:
         #     <%= submit_tag "PAY!" %>
         #   <% end %>
         #
-        # HMAC SHA256 Redsys
         #
         # 
         class Helper < ActiveMerchant::Billing::Integrations::Helper
@@ -44,15 +43,6 @@ module ActiveMerchant #:nodoc:
             attr_accessor :credentials
           end
 
-          ############# HMAC_SHA256_V1 ############
-
-          mapping :signature_version, 'Ds_SignatureVersion'
-
-          mapping :merchant_parameters, 'Ds_MerchantParameters'
-
-          mapping :signature_256, 'Ds_Signature'
-
-          ############# Traditional ############
           mapping :account,     'Ds_Merchant_MerchantName'
 
           mapping :currency,    'Ds_Merchant_Currency'
@@ -74,7 +64,7 @@ module ActiveMerchant #:nodoc:
 
           #### Special Request Specific Fields ####
           mapping :signature,   'Ds_Merchant_MerchantSignature'
-
+          ########
 
           # ammount should always be provided in cents!
           def initialize(order, account, options = {})
@@ -86,9 +76,6 @@ module ActiveMerchant #:nodoc:
             #add_field mappings[:transaction_type], '0' # Default Transaction Type
             self.transaction_type = :authorization
           end
-
-
-          ############# Traditional ############
 
           # Allow credentials to be overwritten if needed
           def credentials
@@ -191,10 +178,6 @@ module ActiveMerchant #:nodoc:
             str += credentials[:secret_key]
 
             Digest::SHA1.hexdigest(str)
-          end
-
-          def sign_request256
-
           end
 
         end

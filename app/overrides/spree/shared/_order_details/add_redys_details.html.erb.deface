@@ -3,9 +3,9 @@
 
 -->
 <% order.payments.each do |payment| %>
-    <% if payment.source_type.to_s.include?('Ceca') %>
+    <% if payment.source_type.to_s.include?('Redsys') %>
         <span class="cc-type">
-            <%= image_tag 'credit_cards/credit_card.gif', :id => 'creditcard-ceca' %>
+            <%= image_tag 'credit_cards/credit_card.gif', :id => 'creditcard-sermepa' %>
             <%= t("payment_states.#{payment.state}") %>
         </span>
     <% end %>

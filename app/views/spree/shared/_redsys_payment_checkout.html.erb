@@ -2,7 +2,7 @@
    require 'active_merchant/billing/integrations/action_view_helper'
    ActionView::Base.send(:include, ActiveMerchant::Billing::Integrations::ActionViewHelper)
 
-   if @payment_method.kind_of?(Spree::BillingIntegration::CecaPayment) &&
+   if @payment_method.kind_of?(Spree::BillingIntegration::RedsysPayment) &&
            ( @payment_method.environment.to_s.include?('development') || @payment_method.preferred_test_mode )
         ActiveMerchant::Billing::Base.integration_mode = :test
    end
@@ -25,20 +25,25 @@
 %>
 
 <%= #form required :charset => "ISO-8859-1", Spree::Config[:site_name]
-    payment_service_for order_number, Spree::Config[:site_name] ,:amount => (@payment_method.amount_in_cents(@order.total)), :currency => @payment_method.preferred_currency, :service => :ceca do |service| %>
-    <% service.description  items.to_s[0..999].gsub(/({|")/,'').gsub(/}/,"\n").gsub("=>",": ").gsub("[","").gsub("]","") %>
+    payment_service_for order_number, Spree::Config[:site_name] ,:amount => (@payment_method.amount_in_cents(@order.total)), :currency => @payment_method.preferred_currency, :service => :sermepa do |service| %>
+    <% service.description  items.to_s[0..120].gsub(/({|")/,'').gsub(/}/,"\n").gsub("=>",": ").gsub("[","(").gsub("]",")")  %>
     <% service.customer_name "#{@order.ship_address.firstname} #{@order.ship_address.lastname}"%>
     <% service.language @payment_method.provider_class.language_code(I18n.locale) %>
-    <% #URL_OK
-       service.success_url ceca_confirm_order_ceca_callbacks_url(@order, :payment_method_id => @payment_method)
-    %>
-    <% #URL_NOK
+    <% #Ds_Merchant_UrlKO
        service.failure_url edit_order_checkout_url(@order, :state => 'payment')
     %>
-    <% #Ds_Merchant_MerchantURL Configure in CECA Console
+    <% #Ds_Merchant_UrlOK
+       service.success_url sermepa_confirm_order_sermepa_callbacks_url(@order, :payment_method_id => @payment_method)
+       #service.success_url order_url(@order)
+
     %>
-    <%= hidden_field_tag 'Cifrado', 'SHA1' %>
-    <%= hidden_field_tag 'Pago_soportado', 'SSL' %>
+    <% #Ds_Merchant_MerchantURL
+       if @payment_method.preferred_notify_alternative_domain_url.present?
+         service.notify_url(@payment_method.preferred_notify_alternative_domain_url + sermepa_notify_order_sermepa_callbacks_path(@order, :payment_method_id => @payment_method))
+       else
+         service.notify_url sermepa_notify_order_sermepa_callbacks_url(@order, :payment_method_id => @payment_method, :protocol => 'http')
+       end
+    %>
     <%= #Sermepa doesn't accept utf-8 charset
         submit_tag "Go to payment gateway!", :class => 'clear', :style => 'display:none;'%>
 <%end%>

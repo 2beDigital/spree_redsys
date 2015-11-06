@@ -1,15 +1,14 @@
 module Spree
-  class CecaCallbacksController < Spree::BaseController
+  class RedsysCallbacksController < Spree::BaseController
 
     skip_before_filter :verify_authenticity_token
 
     #ssl_required
 
     # Receive a direct notification from the gateway
-    def ceca_notify
-      raise 'Invalid params in ceca notification callback' unless params[:Num_operacion]
-      @order ||= Spree::Order.find_by_number!('R'+params[:Num_operacion][0..8])
-      notify_acknowledge = acknowledgeSignature(ceca_credentials(payment_method))
+    def redsys_notify
+      @order ||= Spree::Order.find_by_number!(params[:order_id])
+      notify_acknowledge = acknowledgeSignature(redsys_credentials(payment_method))
       if notify_acknowledge
         #TODO add source to payment
         unless @order.state == "complete"
@@ -26,7 +25,7 @@ module Spree
 
 
     # Handle the incoming user
-    def ceca_confirm
+    def redsys_confirm
       @order ||= Spree::Order.find_by_number!(params[:order_id])
       unless @order.state == "complete"
         order_upgrade()
@@ -40,11 +39,10 @@ module Spree
     end
 
 
-    def ceca_credentials (payment_method)
+    def redsys_credentials (payment_method)
       {
-          :AcquirerBIN   => payment_method.preferred_AcquirerBIN,
-          :MerchantID    => payment_method.preferred_MerchantID,
-          :TerminalID    => payment_method.preferred_TerminalID,
+          :terminal_id   => payment_method.preferred_terminal_id,
+          :commercial_id => payment_method.preferred_commercial_id,
           :secret_key    => payment_method.preferred_secret_key,
           :key_type      => payment_method.preferred_key_type
       }
@@ -52,17 +50,17 @@ module Spree
 
     def payment_upgrade (params, no_risky)
       payment = @order.payments.create!({:amount => @order.total,
-                                         :payment_method => payment_method,
-                                         :response_code => params[:Num_aut].to_s,
-                                         :avs_response => params[:Referencia].to_s})
-
+                                        :payment_method => payment_method,
+                                        :response_code => params['Ds_Response'].to_s,
+                                        :avs_response => params['Ds_AuthorisationCode'].to_s})
       payment.started_processing!
       @order.update(:considered_risky => 0) if no_risky
     end
 
 
     def payment_method
-      @payment_method ||= Spree::PaymentMethod.find_by_type("Spree::BillingIntegration::cecaPayment")
+      @payment_method ||= Spree::PaymentMethod.find(params[:payment_method_id])
+      @payment_method ||= Spree::PaymentMethod.find_by_type("Spree::BillingIntegration::redsysPayment")
     end
 
     def order_upgrade
@@ -75,26 +73,23 @@ module Spree
     end
 
     def acknowledgeSignature(credentials = nil)
-      return false if (params[:TerminalID].blank? ||
-          params[:TerminalID].to_s != "00000003")
+      return false if (params['Ds_Response'].blank? ||
+          params['Ds_Response'].to_s != "0000")
       str =
-          credentials[:secret_key] +
-          params[:MerchantID].to_s +
-              params[:AcquirerBIN].to_s +
-              params[:TerminalID].to_s +
-              params[:Num_operacion].to_s +
-              params[:Importe].to_s +
-              params[:TipoMoneda].to_s +
-              params[:Exponente].to_s +
-              params[:Referencia].to_s
+          params['Ds_Amount'].to_s +
+              params['Ds_Order'].to_s +
+              params['Ds_MerchantCode'].to_s +
+              params['Ds_Currency'].to_s +
+              params['Ds_Response'].to_s
+      str += credentials[:secret_key]
       sig = Digest::SHA1.hexdigest(str)
       msg =
-          "ceca_notify: Hour " +
-              Time.now.to_s  +
-          ", order_id: R" + params[:Num_operacion][0..8].to_s +
-          "signature: " + sig.upcase + " ---- Ds_Signature " + params['Firma'].to_s
+          "redsys_notify: Hour " +
+          params['Ds_Hour'].to_s  +
+          ", order_id: " + params[:order_id].to_s +
+          "signature: " + sig.upcase + " ---- Ds_Signature " + params['Ds_Signature'].to_s
       logger.debug "#{msg}"
-      sig.upcase == params[:Firma].to_s.upcase
+      sig.upcase == params['Ds_Signature'].to_s.upcase
     end
 
 
