@@ -25,7 +25,10 @@
 %>
 
 <%= #form required :charset => "ISO-8859-1", Spree::Config[:site_name]
-    payment_service_for order_number, Spree::Config[:site_name], :amount => (@payment_method.amount_in_cents(@order.total)), :currency => @payment_method.preferred_currency, :service => :sermepa do |service| %>
+    payment_service_for order_number, Spree::Config[:site_name],
+                        :amount => (@payment_method.amount_in_cents(@order.total)),
+                        :currency => @payment_method.preferred_currency,
+                        :service => :redsys do |service| %>
 
     <%# service.description  items.to_s[0..120].gsub(/({|")/,'').gsub(/}/,"\n").gsub("=>",": ").gsub("[","(").gsub("]",")")  %>
     <%# service.customer_name "#{@order.ship_address.firstname} #{@order.ship_address.lastname}"%>
@@ -44,11 +47,11 @@
 
     %>
     <% #Ds_Merchant_MerchantURL
-       if @payment_method.preferred_notify_alternative_domain_url.present?
-         service.notify_url(@payment_method.preferred_notify_alternative_domain_url + sermepa_notify_order_sermepa_callbacks_path(@order, :payment_method_id => @payment_method))
-       else
-         service.notify_url sermepa_notify_order_sermepa_callbacks_url(@order, :payment_method_id => @payment_method, :protocol => 'http')
-       end
+       # if @payment_method.preferred_notify_alternative_domain_url.present?
+       #   service.notify_url(@payment_method.preferred_notify_alternative_domain_url + sermepa_notify_order_sermepa_callbacks_path(@order, :payment_method_id => @payment_method))
+       # else
+       #   service.notify_url sermepa_notify_order_sermepa_callbacks_url(@order, :payment_method_id => @payment_method, :protocol => 'http')
+       # end
     %>
     <%= #Sermepa doesn't accept utf-8 charset
         submit_tag "Go to payment gateway!", :class => 'clear', :style => 'display:none;'%>
@@ -63,7 +66,6 @@
           var currentHash = hash();          
           if (currentHash) { document.location.href = back_url; return; }
           hash(back_url, true);
-          document.forms[0].acceptCharset = "ISO-8859-1";
           //document.forms[0].submit();
       });
     });

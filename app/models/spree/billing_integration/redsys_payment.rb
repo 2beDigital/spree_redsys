@@ -7,7 +7,7 @@
     preference :notify_alternative_domain_url, :string #This can allow us cloudflare integration
 
     def provider_class
-      ActiveMerchant::Billing::Integrations::Sermepa
+      ActiveMerchant::Billing::Integrations::Redsys
     end
 
     def actions

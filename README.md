@@ -14,7 +14,7 @@ Install
 
 Add the following line to your application's Gemfile.
 
-gem "spree_redsys", :https => "https://github.com/2beDigital/spree-redsys.git"
+gem "spree_redsys", :https => "https://github.com/2beDigital/spree_redsys.git"
 
 Configuring
 ===========
@@ -39,4 +39,4 @@ TODO
 
 . Locales...
 
-Copyright (c) 2012, released under the New BSD License
+Copyright (c) 2015, released under the New BSD License

@@ -1,1 +1,1 @@
-require 'active_merchant/billing/integrations/sermepa'
+require 'active_merchant/billing/integrations/redsys'

@@ -2,7 +2,7 @@
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     module Integrations #:nodoc:
-      module Sermepa
+      module Redsys
         class Notification < ActiveMerchant::Billing::Integrations::Notification
           include PostsData
 
@@ -35,7 +35,7 @@ module ActiveMerchant #:nodoc:
           end
 
           def currency
-            Sermepa.currency_from_code( params['ds_currency'] ) 
+            Redsys.currency_from_code( params['ds_currency'] ) 
           end
 
           # Status of transaction. List of possible values:
@@ -58,7 +58,7 @@ module ActiveMerchant #:nodoc:
           end
 
           def error_message
-            msg = Sermepa.response_code_message(error_code)
+            msg = Redsys.response_code_message(error_code)
             error_code.to_s + ' - ' + (msg.nil? ? 'Operación Aceptada' : msg)
           end
 
@@ -72,12 +72,12 @@ module ActiveMerchant #:nodoc:
           # matches up with the details provided.
           #
           # Optionally, a set of credentials can be provided that should contain a 
-          # :secret_key instead of using the global credentials defined in the Sermepa::Helper.
+          # :secret_key instead of using the global credentials defined in the Redsys::Helper.
           #
           # Example:
           # 
           #   def notify
-          #     notify = Sermepa::Notification.new(request.query_parameters)
+          #     notify = Redsys::Notification.new(request.query_parameters)
           #
           #     if notify.acknowledge
           #       ... process order ... if notify.complete?
@@ -98,7 +98,7 @@ module ActiveMerchant #:nodoc:
               str += params['ds_transactiontype'].to_s + params['ds_securepayment'].to_s
             end
 
-            str += (credentials || Sermepa::Helper.credentials)[:secret_key]
+            str += (credentials || Redsys::Helper.credentials)[:secret_key]
             sig = Digest::SHA1.hexdigest(str)
             sig.upcase == params['ds_signature'].to_s.upcase
           end

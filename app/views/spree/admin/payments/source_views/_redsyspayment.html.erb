@@ -3,7 +3,7 @@
   <legend><%= t(:Redsys) %></legend>
 
   <table class="index">
-    <tr data-hook="Sermepa_header">
+    <tr data-hook="RedSys_header">
       <th><%= t(:type) %></th>
       <th><%= t('spree.date') %></th>
       <th><%= t(:amount) %></th>
@@ -11,7 +11,7 @@
       <th><%= t(:response_code) %></th>
       <th><%= t(:avs_response) %></th>
     </tr>
-        <tr data-hook="SermepaPayment_row">
+        <tr data-hook="RedSysPayment_row">
           <td>
             <%= payment.source_type %>
           </td>

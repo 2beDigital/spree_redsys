@@ -2,17 +2,17 @@
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     module Integrations #:nodoc:
-      module Sermepa
-        # Sermepa/Servired Spanish Virtual POS Gateway
+      module Redsys
+        # Redsys/Servired Spanish Virtual POS Gateway
         #
-        # Support for the Spanish payment gateway provided by Sermepa, part of Servired,
+        # Support for the Spanish payment gateway provided by Redsys, part of Servired,
         # one of the main providers in Spain to Banks and Cajas.
         #
         # Requires the :terminal_id, :commercial_id, and :secret_key to be set in the credentials
         # before the helper can be used. Credentials may be overwriten when instantiating the helper
         # if required or instead of the global variable. Optionally, the :key_type can also be set to 
         # either 'sha1_complete' or 'sha1_extended', where the later is the default case. This
-        # is a configurable option in the Sermepa admin which you may or may not be able to access.
+        # is a configurable option in the Redsys admin which you may or may not be able to access.
         # If nothing seems to work, try changing this.
         #
         # Ensure the gateway is configured correctly. Synchronization should be set to Asynchronous
@@ -22,7 +22,7 @@ module ActiveMerchant #:nodoc:
         #
         # Your view for a payment form might look something like the following:
         #
-        #   <%= payment_service_for @transaction.id, 'Company name', :amount => @transaction.amount, :currency => 'EUR', :service => :sermepa do |service| %>
+        #   <%= payment_service_for @transaction.id, 'Company name', :amount => @transaction.amount, :currency => 'EUR', :service => :Redsys do |service| %>
         #     <% service.description     @sale.description %>
         #     <% service.customer_name   @sale.client.name %>
         #     <% service.notify_url      notify_sale_url(@sale) %>
@@ -56,7 +56,7 @@ module ActiveMerchant #:nodoc:
           #mapping :account,     'Ds_Merchant_MerchantName'
 
           #mapping :currency,    'Ds_Merchant_Currency'
-          #mapping :amount,      'Ds_Merchant_Amount'
+          mapping :amount,      'Ds_Merchant_Amount'
 
           #mapping :order,       'Ds_Merchant_Order'
           #mapping :description, 'Ds_Merchant_ProductDescription'
@@ -80,11 +80,10 @@ module ActiveMerchant #:nodoc:
           def initialize(order, account, options = {})
             self.credentials = options.delete(:credentials) if options[:credentials]
             super(order, account, options)
-
             #add_field 'Ds_Merchant_MerchantCode', credentials[:commercial_id]
             #add_field 'Ds_Merchant_Terminal', credentials[:terminal_id]
-            add_field 'Ds_Merchant_Terminal', credentials[:terminal_id]
-
+            #add_field mappings[:transaction_type], '0' # Default Transaction Type
+            self.merchant_Parameters = options
             self.transaction_type = :authorization
           end
 
@@ -118,22 +117,57 @@ module ActiveMerchant #:nodoc:
           end
 
           def currency=( value )
-            add_field mappings[:currency], Sermepa.currency_code(value) 
+            add_field mappings[:currency], Redsys.currency_code(value) 
           end
 
           def language=(lang)
-            add_field mappings[:language], Sermepa.language_code(lang)
+            add_field mappings[:language], Redsys.language_code(lang)
           end
 
           def transaction_type=(type)
-            add_field mappings[:transaction_type], Sermepa.transaction_code(type)
+            add_field mappings[:transaction_type], Redsys.transaction_code(type)
           end
 
           def form_fields
             add_field mappings[:signature], sign_request
+            add_field mappings[:merchant_parameters], create_Merchant_Parameters
             @fields
           end
 
+          def merchant_UrlKO
+            edit_order_checkout_url(@order, :state => 'payment')
+          end
+
+          def merchant_UrlOK
+            Redsys_confirm_order_Redsys_callbacks_url(@order, :payment_method_id => @payment_method)
+          end
+
+          def create_Merchant_Url
+            if @payment_method.preferred_notify_alternative_domain_url.present?
+              service.notify_url(@payment_method.preferred_notify_alternative_domain_url + Redsys_notify_order_Redsys_callbacks_path(@order, :payment_method_id => @payment_method))
+            else
+              service.notify_url Redsys_notify_order_Redsys_callbacks_url(@order, :payment_method_id => @payment_method, :protocol => 'http')
+            end
+          end
+
+          def merchant_Parameters
+            {
+            :Ds_Merchant_Amount => amount,
+            :Ds_Merchant_Order => order,
+            :Ds_Merchant_MerchantCode => credentials[:commercial_id],
+            :Ds_Merchant_Currency => currency,
+            :Ds_Merchant_TransactionType => '0', # Default Transaction Type
+            :Ds_Merchant_Terminal => credentials[:terminal_id]
+            #:Ds_Merchant_MerchantURL => create_Merchant_Url,
+            #:Ds_Merchant_UrlOK => merchant_UrlKO,
+            #:Ds_Merchant_UrlKO => merchant_UrlOK
+            }
+
+          end
+
+          def create_Merchant_Parameters
+            merchant_Parameters.to_json
+          end
 
           # Send a manual request for the currently prepared transaction.
           # This is an alternative to the normal view helper and is useful
@@ -147,7 +181,7 @@ module ActiveMerchant #:nodoc:
             headers['Content-Type'] = 'application/x-www-form-urlencoded'
   
             # Return the raw response data
-            ssl_post(Sermepa.operations_url, "entrada="+CGI.escape(body), headers)
+            ssl_post(Redsys.operations_url, "entrada="+CGI.escape(body), headers)
           end
 
           protected
@@ -179,7 +213,7 @@ module ActiveMerchant #:nodoc:
                   @fields['Ds_Merchant_MerchantCode'].to_s +
                   @fields['Ds_Merchant_Currency'].to_s
 
-            case Sermepa.transaction_from_code(@fields['Ds_Merchant_TransactionType'])
+            case Redsys.transaction_from_code(@fields['Ds_Merchant_TransactionType'])
             when :recurring_transaction
               str += @fields['Ds_Merchant_SumTotal']
             end

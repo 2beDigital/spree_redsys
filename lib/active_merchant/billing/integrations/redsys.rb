@@ -4,11 +4,11 @@ module ActiveMerchant #:nodoc:
     module Integrations #:nodoc:
       # See the BbvaTpv::Helper class for more generic information on usage of
       # this integrated payment method.
-      module Sermepa
+      module Redsys
 
-        autoload :Helper, 'active_merchant/billing/integrations/sermepa/helper.rb'
-        autoload :Return, 'active_merchant/billing/integrations/sermepa/return.rb'
-        autoload :Notification, 'active_merchant/billing/integrations/sermepa/notification.rb'
+        autoload :Helper, 'active_merchant/billing/integrations/redsys/helper.rb'
+        autoload :Return, 'active_merchant/billing/integrations/redsys/return.rb'
+        autoload :Notification, 'active_merchant/billing/integrations/redsys/notification.rb'
        
         mattr_accessor :service_test_url
         self.service_test_url = "https://sis-t.redsys.es:25443/sis/realizarPago"
