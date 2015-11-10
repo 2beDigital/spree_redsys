@@ -37,6 +37,7 @@
                         :return_url => edit_order_checkout_url(@order, :state => 'payment'),
                         :forward_url => redsys_confirm_order_redsys_callbacks_url(@order, :payment_method_id => @payment_method),
                         :notify_url => notify_url_redsys,
+
     :service => :redsys do |service| %>
 
     <% #Ds_Signature version

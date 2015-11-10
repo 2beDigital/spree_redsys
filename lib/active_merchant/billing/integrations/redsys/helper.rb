@@ -70,19 +70,17 @@ module ActiveMerchant #:nodoc:
                 :Ds_Merchant_Order => order,
                 :Ds_Merchant_MerchantName => account,
                 :Ds_Merchant_Amount => options[:amount],
-                :Ds_Merchant_Currency => options[:currency],
+                :Ds_Merchant_Currency => Redsys.currency_code(options[:currency]),
                 :Ds_Merchant_MerchantCode => credentials[:commercial_id],
                 :Ds_Merchant_Terminal => credentials[:terminal_id],
-                :Ds_Merchant_TransactionType => '0', # Default Transaction Type
+                :Ds_Merchant_TransactionType => Redsys.transaction_code(:authorization), # Default Transaction Type
                 :Ds_Merchant_ProductDescription => options[:description],
                 :Ds_Merchant_Titular => options[:account_name],
-                :Ds_Merchant_ConsumerLanguage => options[:country],
+                :Ds_Merchant_ConsumerLanguage => Redsys.language_code(options[:country]),
                 :Ds_Merchant_UrlKO => options[:return_url],
                 :Ds_Merchant_UrlOK => options[:forward_url],
                 :Ds_Merchant_MerchantURL => options[:notify_url]
             }
-            self.merchant_Parameters = options
-            self.transaction_type = :authorization
           end
 
 
@@ -113,7 +111,7 @@ module ActiveMerchant #:nodoc:
             keyDecoded=Base64.decode64(key)
             key3des=des3key(keyDecoded,@redsysparams[:Ds_Merchant_Order])
             hmac=hmac(key3des,create_Merchant_Parameters)
-            sign=Base64.encode64(hmac)
+            sign=Base64.strict_encode64(hmac)
           end
 
           protected
