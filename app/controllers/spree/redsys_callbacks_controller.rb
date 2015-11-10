@@ -1,3 +1,7 @@
+require 'openssl'
+require 'base64'
+require 'json'
+
 module Spree
   class RedsysCallbacksController < Spree::BaseController
 
@@ -72,26 +76,53 @@ module Spree
       @order.finalize!
     end
 
-    def acknowledgeSignature(credentials = nil)
-      return false if (params['Ds_Response'].blank? ||
-          params['Ds_Response'].to_s != "0000")
-      str =
-          params['Ds_Amount'].to_s +
-              params['Ds_Order'].to_s +
-              params['Ds_MerchantCode'].to_s +
-              params['Ds_Currency'].to_s +
-              params['Ds_Response'].to_s
-      str += credentials[:secret_key]
-      sig = Digest::SHA1.hexdigest(str)
-      msg =
-          "redsys_notify: Hour " +
-          params['Ds_Hour'].to_s  +
-          ", order_id: " + params[:order_id].to_s +
-          "signature: " + sig.upcase + " ---- Ds_Signature " + params['Ds_Signature'].to_s
-      logger.debug "#{msg}"
-      sig.upcase == params['Ds_Signature'].to_s.upcase
+    protected
+
+    def decode_Merchant_Parameters
+      Base64.strict_decode64(params[:Ds_MerchantParameters])
     end
 
+    def des3key(key,message)
+      block_length = 8
+      cipher = OpenSSL::Cipher::Cipher.new("des-ede3-cbc")
+      cipher.padding = 0
+      cipher.encrypt
+      cipher.key = key
+      message += "\0" until message.bytesize % block_length == 0
+      ciphertext = cipher.update(message)
+      ciphertext << cipher.final
+      ciphertext
+    end
+
+    def hmac(key,message)
+      hash  = OpenSSL::HMAC.digest('sha256', key, message)
+    end
+
+    def create_MerchantSignature_Notif
+      key = credentials[:secret_key]
+      keyDecoded=Base64.decode64(key)
+      key3des=des3key(keyDecoded, params[:Ds_MerchantParameters])
+      hmac=hmac(key3des,decode_Merchant_Parameters)
+      sign=Base64.strict_encode64(hmac)
+    end
+
+    def acknowledgeSignature(credentials = nil)
+      return false if(params[:Ds_SignatureVersion].blank? ||
+          params[:Ds_MerchantParameters].blank? ||
+          params[:Ds_Signature].blank?)
+
+      #HMAC_SHA256_V1
+      return false if(params[:Ds_SignatureVersion] != credentials[:key_type])
+
+      decodec = decode_Merchant_Parameters
+      create_Signature = create_MerchantSignature_Notif
+      msg =
+          "redsys_notify: Hour " + decodec[:Ds_Hour].to_s  +
+          ", order_id: " + decodec[:order_id].to_s +
+          "signature: " + sig.upcase + " ---- Ds_Signature " + params[:Ds_Signature].to_s
+      logger.debug "#{msg}"
+      create_Signature.upcase == params[:Ds_Signature].to_s.upcase
+    end
 
   end
 end
