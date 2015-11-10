@@ -1,3 +1,7 @@
+require 'openssl'
+require 'base64'
+require 'json'
+
 # encoding: utf-8
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
@@ -22,14 +26,19 @@ module ActiveMerchant #:nodoc:
         #
         # Your view for a payment form might look something like the following:
         #
-        #   <%= payment_service_for @transaction.id, 'Company name', :amount => @transaction.amount, :currency => 'EUR', :service => :Redsys do |service| %>
-        #     <% service.description     @sale.description %>
-        #     <% service.customer_name   @sale.client.name %>
-        #     <% service.notify_url      notify_sale_url(@sale) %>
-        #     <% service.success_url     win_sale_url(@sale) %>
-        #     <% service.failure_url     fail_sale_url(@sale) %>
+        #<%= payment_service_for order_number, Spree::Config[:site_name],
+        #    :amount => (@payment_method.amount_in_cents(@order.total)),
+        #    :currency => @payment_method.preferred_currency,
+        #    :description => items.to_s[0..120].gsub(/({|")/,'').gsub(/}/,"\n").gsub("=>",": ").gsub("[","(").gsub("]",")"),
+        #    :account_name => "#{@order.ship_address.firstname} #{@order.ship_address.lastname}",
+        #    :country => @payment_method.provider_class.language_code(I18n.locale),
+        #    :return_url => edit_order_checkout_url(@order, :state => 'payment'),
+        #    :forward_url => redsys_confirm_order_redsys_callbacks_url(@order, :payment_method_id => @payment_method),
+        #    :notify_url => notify_url_redsys,
+        #    :service => :redsys do |service| %>
         #    
         #     <%= submit_tag "PAY!" %>
+        #     <% service.signature_version @payment_method.preferred_key_type %>
         #   <% end %>
         #
         # HMAC SHA256 Redsys
@@ -42,6 +51,7 @@ module ActiveMerchant #:nodoc:
             # Credentials should be set as a hash containing the fields:
             #  :terminal_id, :commercial_id, :secret_key, :key_type (optional)
             attr_accessor :credentials
+            attr_reader :redsysparams
           end
 
           ############# HMAC_SHA256_V1 ############
@@ -52,37 +62,25 @@ module ActiveMerchant #:nodoc:
 
           mapping :signature_256, 'Ds_Signature'
 
-          ############# Traditional ############
-          #mapping :account,     'Ds_Merchant_MerchantName'
-
-          #mapping :currency,    'Ds_Merchant_Currency'
-          mapping :amount,      'Ds_Merchant_Amount'
-
-          #mapping :order,       'Ds_Merchant_Order'
-          #mapping :description, 'Ds_Merchant_ProductDescription'
-          #mapping :client,      'Ds_Merchant_Titular'
-
-          mapping :notify_url,  'Ds_Merchant_MerchantURL'
-          mapping :success_url, 'Ds_Merchant_UrlOK'
-          mapping :failure_url, 'Ds_Merchant_UrlKO'
-
-          #mapping :language,    'Ds_Merchant_ConsumerLanguage'
-
-          #mapping :transaction_type, 'Ds_Merchant_TransactionType'
-
-          #mapping :customer_name, 'Ds_Merchant_Titular'
-
-          #### Special Request Specific Fields ####
-          mapping :signature,   'Ds_Merchant_MerchantSignature'
-
-
           # ammount should always be provided in cents!
           def initialize(order, account, options = {})
             self.credentials = options.delete(:credentials) if options[:credentials]
             super(order, account, options)
-            #add_field 'Ds_Merchant_MerchantCode', credentials[:commercial_id]
-            #add_field 'Ds_Merchant_Terminal', credentials[:terminal_id]
-            #add_field mappings[:transaction_type], '0' # Default Transaction Type
+            @redsysparams = {
+                :Ds_Merchant_Order => order,
+                :Ds_Merchant_MerchantName => account,
+                :Ds_Merchant_Amount => options[:amount],
+                :Ds_Merchant_Currency => options[:currency],
+                :Ds_Merchant_MerchantCode => credentials[:commercial_id],
+                :Ds_Merchant_Terminal => credentials[:terminal_id],
+                :Ds_Merchant_TransactionType => '0', # Default Transaction Type
+                :Ds_Merchant_ProductDescription => options[:description],
+                :Ds_Merchant_Titular => options[:account_name],
+                :Ds_Merchant_ConsumerLanguage => options[:country],
+                :Ds_Merchant_UrlKO => options[:return_url],
+                :Ds_Merchant_UrlOK => options[:forward_url],
+                :Ds_Merchant_MerchantURL => options[:notify_url]
+            }
             self.merchant_Parameters = options
             self.transaction_type = :authorization
           end
@@ -98,138 +96,42 @@ module ActiveMerchant #:nodoc:
             @credentials = (self.class.credentials || {}).dup.merge(creds)
           end
 
-          def amount=(money)
-            cents = money.respond_to?(:cents) ? money.cents : money
-            if money.is_a?(String) || cents.to_i <= 0
-              raise ArgumentError, 'money amount must be either a Money object or a positive integer in cents.'
-            end
-            add_field mappings[:amount], cents.to_i
-          end
-
-          def order=(order_id)
-            order_id = order_id.to_s
-            if order_id !~ /^[0-9]{4}/ && order_id.length <= 8
-              order_id = ('0' * 4) + order_id
-            end
-            regexp = /^[0-9]{4}[0-9a-zA-Z]{0,8}$/
-            raise "Invalid order number format! First 4 digits must be numbers" if order_id !~ regexp
-            add_field mappings[:order], order_id
-          end
-
-          def currency=( value )
-            add_field mappings[:currency], Redsys.currency_code(value) 
-          end
-
-          def language=(lang)
-            add_field mappings[:language], Redsys.language_code(lang)
-          end
-
-          def transaction_type=(type)
-            add_field mappings[:transaction_type], Redsys.transaction_code(type)
-          end
-
           def form_fields
-            add_field mappings[:signature], sign_request
             add_field mappings[:merchant_parameters], create_Merchant_Parameters
+            add_field mappings[:signature_256], create_Merchant_Signature
             @fields
           end
 
-          def merchant_UrlKO
-            edit_order_checkout_url(@order, :state => 'payment')
-          end
-
-          def merchant_UrlOK
-            Redsys_confirm_order_Redsys_callbacks_url(@order, :payment_method_id => @payment_method)
-          end
-
-          def create_Merchant_Url
-            if @payment_method.preferred_notify_alternative_domain_url.present?
-              service.notify_url(@payment_method.preferred_notify_alternative_domain_url + Redsys_notify_order_Redsys_callbacks_path(@order, :payment_method_id => @payment_method))
-            else
-              service.notify_url Redsys_notify_order_Redsys_callbacks_url(@order, :payment_method_id => @payment_method, :protocol => 'http')
-            end
-          end
-
-          def merchant_Parameters
-            {
-            :Ds_Merchant_Amount => amount,
-            :Ds_Merchant_Order => order,
-            :Ds_Merchant_MerchantCode => credentials[:commercial_id],
-            :Ds_Merchant_Currency => currency,
-            :Ds_Merchant_TransactionType => '0', # Default Transaction Type
-            :Ds_Merchant_Terminal => credentials[:terminal_id]
-            #:Ds_Merchant_MerchantURL => create_Merchant_Url,
-            #:Ds_Merchant_UrlOK => merchant_UrlKO,
-            #:Ds_Merchant_UrlKO => merchant_UrlOK
-            }
-
-          end
-
           def create_Merchant_Parameters
-            merchant_Parameters.to_json
-          end
-
-          # Send a manual request for the currently prepared transaction.
-          # This is an alternative to the normal view helper and is useful
-          # for special types of transaction.
-          def send_transaction
-            body = build_xml_request
-
-            headers = { }
-            headers['Content-Length'] = body.size.to_s
-            headers['User-Agent'] = "Active Merchant -- http://activemerchant.org"
-            headers['Content-Type'] = 'application/x-www-form-urlencoded'
-  
-            # Return the raw response data
-            ssl_post(Redsys.operations_url, "entrada="+CGI.escape(body), headers)
-          end
-
-          protected
-
-          def build_xml_request
-            xml = Builder::XmlMarkup.new :indent => 2
-            xml.DATOSENTRADA do
-              xml.DS_Version 0.1
-              xml.DS_MERCHANT_CURRENCY @fields['Ds_Merchant_Currency']
-              xml.DS_MERCHANT_AMOUNT @fields['Ds_Merchant_Amount']
-              xml.DS_MERCHANT_MERCHANTURL @fields['Ds_Merchant_MerchantURL']
-              xml.DS_MERCHANT_TRANSACTIONTYPE @fields['Ds_Merchant_TransactionType']
-              xml.DS_MERCHANT_MERCHANTDATA @fields['Ds_Merchant_Product_Description']
-              xml.DS_MERCHANT_TERMINAL credentials[:terminal_id]
-              xml.DS_MERCHANT_MERCHANTCODE credentials[:commercial_id]
-              xml.DS_MERCHANT_ORDER @fields['Ds_Merchant_Order']
-              xml.DS_MERCHANT_MERCHANTSIGNATURE sign_request
-            end
-            xml.target!
+            Base64.strict_encode64(@redsysparams.to_json)
           end
 
 
           # Generate a signature authenticating the current request.
-          # Values included in the signature are determined by the the type of 
-          # transaction.
-          def sign_request
-            str = @fields['Ds_Merchant_Amount'].to_s +
-                  @fields['Ds_Merchant_Order'].to_s +
-                  @fields['Ds_Merchant_MerchantCode'].to_s +
-                  @fields['Ds_Merchant_Currency'].to_s
-
-            case Redsys.transaction_from_code(@fields['Ds_Merchant_TransactionType'])
-            when :recurring_transaction
-              str += @fields['Ds_Merchant_SumTotal']
-            end
-
-            if credentials[:key_type].blank? || credentials[:key_type] == 'sha1_extended'
-              str += @fields['Ds_Merchant_TransactionType'].to_s +
-                     @fields['Ds_Merchant_MerchantURL'].to_s # may be blank!
-            end
-
-            str += credentials[:secret_key]
-
-            Digest::SHA1.hexdigest(str)
+          def create_Merchant_Signature
+            key = credentials[:secret_key]
+            keyDecoded=Base64.decode64(key)
+            key3des=des3key(keyDecoded,@redsysparams[:Ds_Merchant_Order])
+            hmac=hmac(key3des,create_Merchant_Parameters)
+            sign=Base64.encode64(hmac)
           end
 
-          def sign_request256
+          protected
 
+          def des3key(key,message)
+            block_length = 8
+            cipher = OpenSSL::Cipher::Cipher.new("des-ede3-cbc")
+            cipher.padding = 0
+            cipher.encrypt
+            cipher.key = key
+            message += "\0" until message.bytesize % block_length == 0
+            ciphertext = cipher.update(message)
+            ciphertext << cipher.final
+            ciphertext
+          end
+
+          def hmac(key,message)
+            hash  = OpenSSL::HMAC.digest('sha256', key, message)
           end
 
         end
