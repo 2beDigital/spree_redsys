@@ -1,9 +1,12 @@
 require 'openssl'
 require 'base64'
 require 'json'
+require '../../../lib/active_merchant/billing/integrations/redsys/helper'
 
 module Spree
   class RedsysCallbacksController < Spree::BaseController
+
+    incl
 
     skip_before_filter :verify_authenticity_token
 
@@ -79,30 +82,19 @@ module Spree
     protected
 
     def decode_Merchant_Parameters
-      Base64.strict_decode64(params[:Ds_MerchantParameters])
-    end
-
-    def des3key(key,message)
-      block_length = 8
-      cipher = OpenSSL::Cipher::Cipher.new("des-ede3-cbc")
-      cipher.padding = 0
-      cipher.encrypt
-      cipher.key = key
-      message += "\0" until message.bytesize % block_length == 0
-      ciphertext = cipher.update(message)
-      ciphertext << cipher.final
-      ciphertext
-    end
-
-    def hmac(key,message)
-      hash  = OpenSSL::HMAC.digest('sha256', key, message)
+      jsonrec = Base64.urlsafe_decode64(params[:Ds_MerchantParameters])
+      JSON.parse(jsonrec)
     end
 
     def create_MerchantSignature_Notif
       key = credentials[:secret_key]
       keyDecoded=Base64.decode64(key)
-      key3des=des3key(keyDecoded, params[:Ds_MerchantParameters])
-      hmac=hmac(key3des,decode_Merchant_Parameters)
+
+      #obtenemos el orderId.
+      orderrec = (decode_Merchant_Parameters[:Ds_Order].blank?)? decode_Merchant_Parameters[:DS_ORDER] : decode_Merchant_Parameters[:Ds_Order]
+
+      key3des=des3key(keyDecoded, orderrec)
+      hmac=hmac(key3des,params[:Ds_MerchantParameters])
       sign=Base64.strict_encode64(hmac)
     end
 
@@ -117,8 +109,8 @@ module Spree
       decodec = decode_Merchant_Parameters
       create_Signature = create_MerchantSignature_Notif
       msg =
-          "redsys_notify: Hour " + decodec[:Ds_Hour].to_s  +
-          ", order_id: " + decodec[:order_id].to_s +
+          "redsys_notify: " +
+          ", order_id: " + decodec[:Ds_Order].to_s +
           "signature: " + sig.upcase + " ---- Ds_Signature " + params[:Ds_Signature].to_s
       logger.debug "#{msg}"
       create_Signature.upcase == params[:Ds_Signature].to_s.upcase
