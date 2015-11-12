@@ -1,12 +1,10 @@
 require 'openssl'
 require 'base64'
 require 'json'
-require '../../../lib/active_merchant/billing/integrations/redsys/helper'
+require 'active_merchant/billing/integrations/redsys/helper'
 
 module Spree
   class RedsysCallbacksController < Spree::BaseController
-
-    incl
 
     skip_before_filter :verify_authenticity_token
 
