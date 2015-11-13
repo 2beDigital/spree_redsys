@@ -1,7 +1,3 @@
-require 'openssl'
-require 'base64'
-require 'json'
-
 # encoding: utf-8
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:

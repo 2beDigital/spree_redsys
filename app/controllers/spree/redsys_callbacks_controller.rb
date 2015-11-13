@@ -1,8 +1,3 @@
-require 'openssl'
-require 'base64'
-require 'json'
-require 'active_merchant/billing/integrations/redsys/helper'
-
 module Spree
   class RedsysCallbacksController < Spree::BaseController
 
@@ -84,8 +79,7 @@ module Spree
       JSON.parse(jsonrec)
     end
 
-    def create_MerchantSignature_Notif
-      key = credentials[:secret_key]
+    def create_MerchantSignature_Notif(key)
       keyDecoded=Base64.decode64(key)
 
       #obtenemos el orderId.
@@ -105,7 +99,7 @@ module Spree
       return false if(params[:Ds_SignatureVersion] != credentials[:key_type])
 
       decodec = decode_Merchant_Parameters
-      create_Signature = create_MerchantSignature_Notif
+      create_Signature = create_MerchantSignature_Notif(credentials[:secret_key])
       msg =
           "redsys_notify: " +
           ", order_id: " + decodec[:Ds_Order].to_s +

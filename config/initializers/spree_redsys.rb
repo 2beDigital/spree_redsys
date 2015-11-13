@@ -1,1 +1,5 @@
+require 'openssl'
+require 'base64'
+require 'json'
 require 'active_merchant/billing/integrations/redsys'
+require 'active_merchant/billing/integrations/redsys/helper'
