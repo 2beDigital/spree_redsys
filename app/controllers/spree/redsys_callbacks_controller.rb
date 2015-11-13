@@ -102,10 +102,11 @@ module Spree
       create_Signature = create_MerchantSignature_Notif(credentials[:secret_key])
       msg =
           "REDSYS_NOTIFY: " +
-          "----- order_id: " + decodec['Ds_Order'].to_s +
+          "----- order_TS: " + decodec['Ds_Order'].to_s +
           "----- order_Number: " + @order.number +
           "----- Signature: " + create_Signature.to_s.upcase +
-          " ---- Ds_Signature " + params[:Ds_Signature].to_s.upcase
+          " ---- Ds_Signature " + params[:Ds_Signature].to_s.upcase +
+          " ---- RESULT " + ((create_Signature.to_s.upcase == params[:Ds_Signature].to_s.upcase)? 'OK' : 'KO')
       Rails.logger.info "#{msg}"
       create_Signature.to_s.upcase == params[:Ds_Signature].to_s.upcase
     end
