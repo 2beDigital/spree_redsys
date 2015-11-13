@@ -83,7 +83,7 @@ module Spree
       keyDecoded=Base64.decode64(key)
 
       #obtenemos el orderId.
-      orderrec = (decode_Merchant_Parameters[:Ds_Order].blank?)? decode_Merchant_Parameters[:DS_ORDER] : decode_Merchant_Parameters[:Ds_Order]
+      orderrec = (decode_Merchant_Parameters['Ds_Order'].blank?)? decode_Merchant_Parameters['DS_ORDER'] : decode_Merchant_Parameters['Ds_Order']
 
       key3des=des3key(keyDecoded, orderrec)
       hmac=hmac(key3des,params[:Ds_MerchantParameters])
@@ -101,12 +101,33 @@ module Spree
       decodec = decode_Merchant_Parameters
       create_Signature = create_MerchantSignature_Notif(credentials[:secret_key])
       msg =
-          "redsys_notify: " +
-          ", order_id: " + decodec[:Ds_Order].to_s +
-          "signature: " + sig.upcase + " ---- Ds_Signature " + params[:Ds_Signature].to_s
-      logger.debug "#{msg}"
-      create_Signature.upcase == params[:Ds_Signature].to_s.upcase
+          "REDSYS_NOTIFY: " +
+          "----- order_id: " + decodec['Ds_Order'].to_s +
+          "----- order_Number: " + @order.number +
+          "----- Signature: " + create_Signature.to_s.upcase +
+          " ---- Ds_Signature " + params[:Ds_Signature].to_s.upcase
+      Rails.logger.info "#{msg}"
+      create_Signature.to_s.upcase == params[:Ds_Signature].to_s.upcase
     end
+
+    protected
+
+    def des3key(key,message)
+      block_length = 8
+      cipher = OpenSSL::Cipher::Cipher.new("des-ede3-cbc")
+      cipher.padding = 0
+      cipher.encrypt
+      cipher.key = key
+      message += "\0" until message.bytesize % block_length == 0
+      ciphertext = cipher.update(message)
+      ciphertext << cipher.final
+      ciphertext
+    end
+
+    def hmac(key,message)
+      hash  = OpenSSL::HMAC.digest('sha256', key, message)
+    end
+
 
   end
 end
