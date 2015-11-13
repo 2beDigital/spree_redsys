@@ -80,7 +80,7 @@ module Spree
     end
 
     def create_MerchantSignature_Notif(key)
-      keyDecoded=Base64.decode64(key)
+      keyDecoded=Base64.strict_decode64(key)
 
       #obtenemos el orderId.
       orderrec = (decode_Merchant_Parameters['Ds_Order'].blank?)? decode_Merchant_Parameters['DS_ORDER'] : decode_Merchant_Parameters['Ds_Order']
@@ -109,8 +109,6 @@ module Spree
       Rails.logger.info "#{msg}"
       create_Signature.to_s.upcase == params[:Ds_Signature].to_s.upcase
     end
-
-    protected
 
     def des3key(key,message)
       block_length = 8
