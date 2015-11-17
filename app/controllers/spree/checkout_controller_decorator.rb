@@ -19,9 +19,9 @@ module Spree
       load_order
       @payment_method = Spree::PaymentMethod.find(params[:order][:payments_attributes].first[:payment_method_id])
 
-      return unless @payment_method.kind_of?(Spree::BillingIntegration::RedsysPayment)
-      
       @order.payments.destroy_all
+
+      return unless @payment_method.kind_of?(Spree::BillingIntegration::RedsysPayment)
 
       @payment_method.provider_class::Helper.credentials = redsys_credentials(@payment_method)
 
