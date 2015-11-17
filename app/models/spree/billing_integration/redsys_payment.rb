@@ -6,6 +6,11 @@
     preference :key_type, :string, :default => 'HMAC_SHA256_V1'
     preference :notify_alternative_domain_url, :string #This can allow us cloudflare integration
 
+    attr_accessible :preferred_commercial_id, :preferred_terminal_id, :preferred_currency,
+                    :preferred_secret_key, :preferred_key_type, :preferred_notify_alternative_domain_url,
+                    :preferred_server, :preferred_test_mode
+
+
     def provider_class
       ActiveMerchant::Billing::Integrations::Redsys
     end
@@ -16,7 +21,7 @@
 
     # Indicates whether its possible to capture the payment
     def can_capture?(payment)
-      ['checkout', 'pending', 'processing'].include?(payment.state)
+      ['checkout', 'pending'].include?(payment.state)
     end
 
     # Indicates whether its possible to void the payment.
@@ -27,8 +32,6 @@
     def capture(*args)
       ActiveMerchant::Billing::Response.new(true, "", {}, {})
     end
-
-    def cancel(response); end
 
     def void(*args)
       ActiveMerchant::Billing::Response.new(true, "", {}, {})

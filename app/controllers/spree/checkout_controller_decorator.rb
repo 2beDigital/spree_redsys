@@ -10,8 +10,13 @@ module Spree
       return unless (params[:state] == "payment")
       return unless params[:order][:payments_attributes]
 
-      load_order_with_lock
-      @order.update_from_params(params, permitted_checkout_attributes, request.headers.env)
+      if @order.update_attributes(object_params)
+        if params[:order][:coupon_code] and !params[:order][:coupon_code].blank? and @order.coupon_code.present?
+          fire_event('spree.checkout.coupon_code_added', :coupon_code => @order.coupon_code)
+        end
+      end
+
+      load_order
       @payment_method = Spree::PaymentMethod.find(params[:order][:payments_attributes].first[:payment_method_id])
 
       return unless @payment_method.kind_of?(Spree::BillingIntegration::RedsysPayment)

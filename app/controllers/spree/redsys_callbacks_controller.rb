@@ -14,11 +14,11 @@ module Spree
         unless @order.state == "complete"
           order_upgrade
         end
-        payment_upgrade(params, true)
+        payment_upgrade(params)
         @payment = Spree::Payment.find_by_order_id(@order)
         @payment.complete!
       else
-        payment_upgrade(params, false)
+        payment_upgrade(params)
       end
       render :nothing => true
     end
@@ -29,12 +29,12 @@ module Spree
       @order ||= Spree::Order.find_by_number!(params[:order_id])
       unless @order.state == "complete"
         order_upgrade()
-        payment_upgrade(params, false)
+        payment_upgrade(params)
       end
       # Unset the order id as it's completed.
       session[:order_id] = nil #deprecated from 2.3
-      flash.notice = Spree.t(:order_processed_successfully)
-      flash['order_completed'] = true
+      flash[:notice] = I18n.t(:order_processed_successfully)
+      flash[:commerce_tracking] = "true"
       redirect_to order_path(@order)
     end
 
@@ -48,13 +48,14 @@ module Spree
       }
     end
 
-    def payment_upgrade (params, no_risky)
-      payment = @order.payments.create!({:amount => @order.total,
+    def payment_upgrade (params)
+      payment = @order.payments.create({:amount => @order.total,
+                                        :source_type => 'Spree:RedSysCreditCard',
                                         :payment_method => payment_method,
                                         :response_code => params['Ds_Response'].to_s,
-                                        :avs_response => params['Ds_AuthorisationCode'].to_s})
+                                        :avs_response => params['Ds_AuthorisationCode'].to_s},
+                                       :without_protection => true)
       payment.started_processing!
-      @order.update(:considered_risky => 0) if no_risky
     end
 
 
@@ -64,7 +65,8 @@ module Spree
     end
 
     def order_upgrade
-      @order.update(:state => "complete", :considered_risky => 1,  :completed_at => Time.now)
+      @order.update_attributes({:state => "complete", :completed_at => Time.now}, :without_protection => true)
+
       # Since we dont rely on state machine callback, we just explicitly call this method for spree_store_credits
       if @order.respond_to?(:consume_users_credit, true)
         @order.send(:consume_users_credit)
