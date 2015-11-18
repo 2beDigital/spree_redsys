@@ -82,7 +82,7 @@ module Spree
     end
 
     def create_MerchantSignature_Notif(key)
-      keyDecoded=Base64.strict_decode64(key)
+      keyDecoded=Base64.decode64(key)
 
       #obtenemos el orderId.
       orderrec = (decode_Merchant_Parameters['Ds_Order'].blank?)? decode_Merchant_Parameters['DS_ORDER'] : decode_Merchant_Parameters['Ds_Order']
