@@ -87,7 +87,7 @@ module Spree
 
       key3des=des3key(keyDecoded, orderrec)
       hmac=hmac(key3des,params[:Ds_MerchantParameters])
-      sign=Base64.strict_encode64(hmac)
+      sign=Base64.urlsafe_encode64(hmac)
     end
 
 
