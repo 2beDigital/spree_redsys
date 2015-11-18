@@ -80,7 +80,7 @@ module Spree
     end
 
     def create_MerchantSignature_Notif(key)
-      keyDecoded=Base64.strict_decode64(key)
+      keyDecoded=Base64.decode64(key)
 
       #obtenemos el orderId.
       orderrec = (decode_Merchant_Parameters['Ds_Order'].blank?)? decode_Merchant_Parameters['DS_ORDER'] : decode_Merchant_Parameters['Ds_Order']
@@ -89,6 +89,7 @@ module Spree
       hmac=hmac(key3des,params[:Ds_MerchantParameters])
       sign=Base64.strict_encode64(hmac)
     end
+
 
     def acknowledgeSignature(credentials = nil)
       return false if(params[:Ds_SignatureVersion].blank? ||
