@@ -100,6 +100,14 @@ module Spree
       return false if(params[:Ds_SignatureVersion] != credentials[:key_type])
 
       decodec = decode_Merchant_Parameters
+			
+      Rails.logger.debug "Decodec: #{decodec}"
+      Rails.logger.debug "Ds_Response: #{decodec['Ds_Response']}"
+      Rails.logger.debug "Ds_ResponseInt: #{decodec['Ds_Response'].to_i}"
+			
+			#Segons la doc, els codis OKs poden anar de 0000 a 0099 o 900 per a devolucions.
+			return false if (decodec['Ds_Response'].to_i > 99 || decodec['Ds_Response'].to_i==900)
+			
       create_Signature = create_MerchantSignature_Notif(credentials[:secret_key])
       msg =
           "REDSYS_NOTIFY: " +
