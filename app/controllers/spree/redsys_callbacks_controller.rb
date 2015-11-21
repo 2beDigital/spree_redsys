@@ -49,12 +49,13 @@ module Spree
     end
 
     def payment_upgrade (params)
+			decodec = decode_Merchant_Parameters
       payment = @order.payments.create({:amount => @order.total,
                                         :source_type => 'Spree:RedSysCreditCard',
                                         :payment_method => payment_method,
-                                        :response_code => params['Ds_Response'].to_s,
-                                        :avs_response => params['Ds_AuthorisationCode'].to_s},
-                                       :without_protection => true)
+                                        :response_code => decodec['Ds_Response'].to_s,
+                                        :avs_response => decodec['Ds_AuthorisationCode'].to_s},
+																				:without_protection => true)
       payment.started_processing!
     end
 
@@ -101,16 +102,29 @@ module Spree
       return false if(params[:Ds_SignatureVersion] != credentials[:key_type])
 
       decodec = decode_Merchant_Parameters
+			Rails.logger.debug "JSON Decodec: #{decodec}"
+
       create_Signature = create_MerchantSignature_Notif(credentials[:secret_key])
       msg =
           "REDSYS_NOTIFY: " +
-          "----- order_TS: " + decodec['Ds_Order'].to_s +
-          "----- order_Number: " + @order.number +
-          "----- Signature: " + create_Signature.to_s.upcase +
+					" ---- Ds_Response: " + decodec['Ds_Response'].to_s +					
+          " ---- order_TS: " + decodec['Ds_Order'].to_s +
+          " ---- order_Number: " + @order.number +
+          " ---- Signature: " + create_Signature.to_s.upcase +
           " ---- Ds_Signature " + params[:Ds_Signature].to_s.upcase +
           " ---- RESULT " + ((create_Signature.to_s.upcase == params[:Ds_Signature].to_s.upcase)? 'OK' : 'KO')
       Rails.logger.info "#{msg}"
-      create_Signature.to_s.upcase == params[:Ds_Signature].to_s.upcase
+      res=create_Signature.to_s.upcase == params[:Ds_Signature].to_s.upcase
+			
+			responseCode=decodec['Ds_Response'].to_i
+      Rails.logger.debug "Ds_ResponseInt: #{responseCode}"
+			
+			#Potser és una mica rebuscat, però comprovem primer la signature perquè si un señor
+			#maligno envia una petició fake amb Ds_Response d'error, estariem denegant la compra
+			#sense comprovar que la request és correcte.
+			#Segons la doc, els codis OKs poden anar de 0000 a 0099 o 900 per a devolucions.
+			return false if (responseCode > 99 && responseCode!=900)
+			res			
     end
 
     def des3key(key,message)
