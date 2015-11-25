@@ -49,15 +49,14 @@ module Spree
     end
 
     def payment_upgrade (params, no_risky)
-			decodec = decode_Merchant_Parameters
+			decodec = decode_Merchant_Parameters || Array.new
       payment = @order.payments.create!({:amount => @order.total,
                                         :payment_method => payment_method,
-                                        :response_code => decodec['Ds_Response'].to_s,
-                                        :avs_response => decodec['Ds_AuthorisationCode'].to_s})
+                                        :response_code => decodec.include?('Ds_Response')? decodec['Ds_Response'].to_s : nil,
+                                        :avs_response => decodec.include?('Ds_AuthorisationCode')? decodec['Ds_AuthorisationCode'].to_s : nil})
       payment.started_processing!
       @order.update(:considered_risky => 0) if no_risky
     end
-
 
     def payment_method
       @payment_method ||= Spree::PaymentMethod.find(params[:payment_method_id])
@@ -76,6 +75,7 @@ module Spree
     protected
 
     def decode_Merchant_Parameters
+      return nil if(params[:Ds_MerchantParameters].blank?)
       jsonrec = Base64.urlsafe_decode64(params[:Ds_MerchantParameters])
       JSON.parse(jsonrec)
     end
