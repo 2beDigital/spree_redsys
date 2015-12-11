@@ -54,7 +54,7 @@ module Spree
                                         :source_type => 'Spree:RedSysCreditCard',
                                         :payment_method => payment_method,
                                         :response_code => decodec.include?('Ds_Response')? decodec['Ds_Response'].to_s : nil,
-                                        :avs_response => decodec.include?('Ds_AuthorisationCode')? decodec['Ds_AuthorisationCode'].to_s : nil}																				
+                                        :avs_response => decodec.include?('Ds_AuthorisationCode')? decodec['Ds_AuthorisationCode'].to_s : nil},
 																				:without_protection => true)
       payment.started_processing!
     end
