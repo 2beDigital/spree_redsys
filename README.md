@@ -18,7 +18,7 @@ gem "spree_redsys", :https => "https://github.com/2beDigital/spree_redsys.git"
 
 Configuring
 ===========
-Add a new Payment Method, using: Spree::BillingIntegration::Payment as the Prodivder
+Add a new Payment Method, using: Spree::BillingIntegration::Payment as the Provider
 
 Click Create, and enter your Redsys account details.
 
@@ -34,8 +34,6 @@ TODO
 . Write Rspecs, Tests tests...
 
 . Perhaps Iframe integration like Skrill.
-
-. Get Service Url from admin config instead of Active_Merchant Library.
 
 . Locales...
 
