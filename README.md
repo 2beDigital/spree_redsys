@@ -13,9 +13,10 @@ Install
 
 Add the following line to your application's Gemfile.
 
-gem "spree_redsys", :https => "https://github.com/sylvinho81/spree_redsys.git"
+gem "spree_redsys", :git => "https://github.com/sylvinho81/spree_redsys.git", :branch => '3-0-stable'
 
 bundle install
+
 bundle exec rails g spree_redsys:install
 
 
