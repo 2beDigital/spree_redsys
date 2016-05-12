@@ -86,9 +86,9 @@ module Spree
       #obtenemos el orderId.
       orderrec = (decode_Merchant_Parameters['Ds_Order'].blank?)? decode_Merchant_Parameters['DS_ORDER'] : decode_Merchant_Parameters['Ds_Order']
 
-      key3des=des3key(keyDecoded, orderrec)
+      key3des=des3key(key, orderrec)
       hmac=hmac(key3des,params[:Ds_MerchantParameters])
-      sign=Base64.urlsafe_encode64(hmac)
+      Base64.urlsafe_encode64(hmac)
     end
 
 
@@ -128,18 +128,21 @@ module Spree
 
     def des3key(key,message)
       block_length = 8
-      cipher = OpenSSL::Cipher::Cipher.new("des-ede3-cbc")
-      cipher.padding = 0
+      cipher = OpenSSL::Cipher::Cipher.new('DES3')
       cipher.encrypt
-      cipher.key = key
-      message += "\0" until message.bytesize % block_length == 0
-      ciphertext = cipher.update(message)
-      ciphertext << cipher.final
-      ciphertext
+
+      cipher.key = Base64.strict_decode64(key)
+      # The OpenSSL default of an all-zeroes ("\\0") IV is used.
+      cipher.padding = 0
+
+      message += "\0" until message.bytesize % block_length == 0 # Pad with zeros
+
+      output = cipher.update(message) + cipher.final
+      output
     end
 
     def hmac(key,message)
-      hash  = OpenSSL::HMAC.digest('sha256', key, message)
+      OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), key, message)
     end
 
 

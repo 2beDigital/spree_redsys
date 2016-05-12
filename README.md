@@ -22,7 +22,7 @@ bundle exec rails g spree_redsys:install
 
 Configuring
 ===========
-Add a new Payment Method, using: Spree::BillingIntegration::Payment as the Provider
+Add a new Payment Method, using: Spree::BillingIntegration::RedsysPayment as the Provider
 
 Click Create, and enter your Redsys account details.
 
