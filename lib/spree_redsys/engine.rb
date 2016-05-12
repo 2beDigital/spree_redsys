@@ -1,7 +1,7 @@
 module SpreeRedsys
   class Engine < Rails::Engine
     require 'spree/core'
-    isolate_namespace Spree
+    isolate_namespace SpreeRedsys
     engine_name 'spree_redsys'
 
     config.autoload_paths += %W(#{config.root}/lib)
