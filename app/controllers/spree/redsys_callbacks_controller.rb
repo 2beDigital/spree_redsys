@@ -10,7 +10,6 @@ module Spree
       @order ||= Spree::Order.find_by_number!(params[:order_id])
       notify_acknowledge = acknowledgeSignature(redsys_credentials(payment_method))
       if notify_acknowledge
-        #TODO add source to payment
         unless @order.state == "complete"
           order_upgrade
         end
@@ -31,8 +30,8 @@ module Spree
         order_upgrade()
         payment_upgrade(params, false)
       end
-      # Unset the order id as it's completed.
-      session[:order_id] = nil #deprecated from 2.3
+
+      @current_order = nil
       flash.notice = Spree.t(:order_processed_successfully)
       flash['order_completed'] = true
       redirect_to order_path(@order)
@@ -51,16 +50,16 @@ module Spree
     def payment_upgrade (params, no_risky)
 			decodec = decode_Merchant_Parameters || Array.new
       payment = @order.payments.create!({:amount => @order.total,
-                                        :payment_method => payment_method,
-                                        :response_code => decodec.include?('Ds_Response')? decodec['Ds_Response'].to_s : nil,
-                                        :avs_response => decodec.include?('Ds_AuthorisationCode')? decodec['Ds_AuthorisationCode'].to_s : nil})
+                                         :payment_method => payment_method,
+                                         :response_code => decodec.include?('Ds_Response')? decodec['Ds_Response'].to_s : nil,
+                                         :avs_response => decodec.include?('Ds_AuthorisationCode')? decodec['Ds_AuthorisationCode'].to_s : nil})
       payment.started_processing!
       @order.update(:considered_risky => 0) if no_risky
     end
 
     def payment_method
       @payment_method ||= Spree::PaymentMethod.find(params[:payment_method_id])
-      @payment_method ||= Spree::PaymentMethod.find_by_type("Spree::BillingIntegration::redsysPayment")
+      @payment_method ||= Spree::PaymentMethod.find_by_type("Spree::BillingIntegration::RedsysPayment")
     end
 
     def order_upgrade
