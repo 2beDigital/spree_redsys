@@ -54,7 +54,7 @@ module Spree
                                          :response_code => decodec.include?('Ds_Response')? decodec['Ds_Response'].to_s : nil,
                                          :avs_response => decodec.include?('Ds_AuthorisationCode')? decodec['Ds_AuthorisationCode'].to_s : nil})
       payment.started_processing!
-      @order.update(:considered_risky => 0) if no_risky
+      @order.approve! if no_risky
     end
 
     def payment_method
@@ -63,7 +63,9 @@ module Spree
     end
 
     def order_upgrade
-      @order.update(:state => "complete", :considered_risky => 1,  :completed_at => Time.now)
+      @order.update(:state => "complete", :completed_at => Time.now)
+      @order.considered_risky!
+
       # Since we dont rely on state machine callback, we just explicitly call this method for spree_store_credits
       if @order.respond_to?(:consume_users_credit, true)
         @order.send(:consume_users_credit)
