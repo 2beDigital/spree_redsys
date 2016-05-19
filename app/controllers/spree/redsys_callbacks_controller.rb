@@ -11,7 +11,7 @@ module Spree
       @order ||= Spree::Order.find_by_number!(params[:order_id])
       notify = ActiveMerchant::Billing::Integrations::Redsys.notification(request.query_parameters)
       Rails.logger.info "parameters --------------  #{request.query_parameters.inspect}"
-      Rails.logger.info "body --------------  #{request.body.read.inspect}"
+      #Rails.logger.info "body --------------  #{request.body.read.inspect}"
       if notify.acknowledge(redsys_credentials(payment_method)) && notify.complete?
         unless @order.complete?
           order_upgrade
