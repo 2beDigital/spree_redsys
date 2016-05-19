@@ -89,8 +89,6 @@ module ActiveMerchant #:nodoc:
               else
                 'Failed'
             end
-          rescue
-            'Failed'
           end
 
           def error_code
