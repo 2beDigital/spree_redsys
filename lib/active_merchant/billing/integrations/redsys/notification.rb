@@ -89,6 +89,8 @@ module ActiveMerchant #:nodoc:
               else
                 'Failed'
             end
+          rescue
+            'Failed'
           end
 
           def error_code
@@ -194,6 +196,9 @@ module ActiveMerchant #:nodoc:
           def parse(post)
             if post.is_a?(Hash)
               post.each { |key, value|  params[key] = value }
+            elsif post.to_s =~ /<retornoxml>/i
+              # XML source
+              self.params = xml_response_to_hash(@raw)
             else
               for line in post.to_s.split('&')
                 key, value = *line.scan( %r{^([A-Za-z0-9_.]+)\=(.*)$} ).flatten
@@ -201,6 +206,16 @@ module ActiveMerchant #:nodoc:
               end
             end
             @raw = post.inspect.to_s
+          end
+
+          def xml_response_to_hash(xml)
+            result = { }
+            doc = Nokogiri::XML(xml)
+            doc.xpath("//RETORNOXML/OPERACION").children().each do |child|
+              result[child.name] = child.text
+            end
+            result['code'] = doc.xpath("//RETORNOXML/CODIGO").text
+            result
           end
 
         end

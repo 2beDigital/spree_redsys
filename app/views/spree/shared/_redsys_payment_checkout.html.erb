@@ -41,15 +41,7 @@
     <% #Ds_Signature version
        service.signature_version @payment_method.preferred_key_type
     %>
-    <% #Ds_Merchant_UrlKO
-       service.failure_url edit_order_checkout_url(@order, :state => 'payment')
-    %>
-    <% #Ds_Merchant_UrlOK
-       service.success_url redsys_confirm_order_redsys_callbacks_url(@order, :payment_method_id => @payment_method)
-    %>
-    <% #Ds_Merchant_MerchantURL
-       service.notify_url notify_url_redsys
-    %>
+
 
     <%= submit_tag "Go to payment gateway!", :class => 'clear', :style => 'display:none;'%>
 <%end%>
