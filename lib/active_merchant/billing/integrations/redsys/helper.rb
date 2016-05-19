@@ -104,28 +104,30 @@ module ActiveMerchant #:nodoc:
           # Generate a signature authenticating the current request.
           def create_Merchant_Signature
             key = credentials[:secret_key]
-            keyDecoded=Base64.decode64(key)
-            key3des=des3key(keyDecoded,@redsysparams[:Ds_Merchant_Order])
+            key3des=des3key(key,@redsysparams[:Ds_Merchant_Order])
             hmac=hmac(key3des,create_Merchant_Parameters)
-            sign=Base64.strict_encode64(hmac)
+            Base64.strict_encode64(hmac)
           end
 
           protected
 
           def des3key(key,message)
             block_length = 8
-            cipher = OpenSSL::Cipher::Cipher.new("des-ede3-cbc")
-            cipher.padding = 0
+            cipher = OpenSSL::Cipher::Cipher.new('DES3')
             cipher.encrypt
-            cipher.key = key
-            message += "\0" until message.bytesize % block_length == 0
-            ciphertext = cipher.update(message)
-            ciphertext << cipher.final
-            ciphertext
+
+            cipher.key = Base64.strict_decode64(key)
+            # The OpenSSL default of an all-zeroes ("\\0") IV is used.
+            cipher.padding = 0
+
+            message += "\0" until message.bytesize % block_length == 0 # Pad with zeros
+
+            output = cipher.update(message) + cipher.final
+            output
           end
 
           def hmac(key,message)
-            hash  = OpenSSL::HMAC.digest('sha256', key, message)
+            OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), key, message)
           end
 
         end
