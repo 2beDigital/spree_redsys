@@ -20,15 +20,6 @@ module Spree
         @payment.complete!
       else
         @payment = payment_upgrade(params, false)
-        case notify.status
-          when "Pending"
-            @payment.pend!
-          when "Failed"
-            @payment.failure!
-          else
-            @payment.pend!
-            Rails.logger.error "Unexpected response from Active Merchant"
-        end
       end
       render :nothing => true
     end
