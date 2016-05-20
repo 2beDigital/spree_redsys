@@ -9,8 +9,8 @@ module Spree
     # Receive a direct notification from the gateway
     def redsys_notify
       @order ||= Spree::Order.find_by_number!(params[:order_id])
-      notify = ActiveMerchant::Billing::Integrations::Redsys.notification(request.query_parameters)
-      Rails.logger.info "parameters --------------  #{request.query_parameters.inspect}"
+      notify = ActiveMerchant::Billing::Integrations::Redsys.notification(params)
+      Rails.logger.info "parameters --------------  #{params.inspect}"
       #Rails.logger.info "body --------------  #{request.body.read.inspect}"
       if notify.acknowledge(redsys_credentials(payment_method)) && notify.complete?
         unless @order.complete?
