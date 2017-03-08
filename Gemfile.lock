@@ -59,7 +59,7 @@ GIT
 PATH
   remote: .
   specs:
-    spree_redsys (3.0.0)
+    spree_redsys (3.1.0)
       spree_core (>= 3.0.0)
 
 GEM

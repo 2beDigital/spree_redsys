@@ -2,7 +2,7 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_redsys'
-  s.version     =  '3.0.0'
+  s.version     =  '3.1.0'
   s.summary     = 'Adds Sermepa TPV as a Payment Method to Spree store'
   s.description = 'Redsys is a spanish payment gateway. Servired Network'
   s.author    = 'Pablo'
