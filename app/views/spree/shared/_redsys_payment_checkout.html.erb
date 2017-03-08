@@ -3,7 +3,7 @@
    ActionView::Base.send(:include, ActiveMerchant::Billing::Integrations::ActionViewHelper)
 
    if @payment_method.kind_of?(Spree::BillingIntegration::RedsysPayment) &&
-           ( @payment_method.environment.to_s.include?('development') || @payment_method.preferred_test_mode )
+           ( @payment_method.preferred_server.eql?('test') || @payment_method.preferred_test_mode )
         ActiveMerchant::Billing::Base.integration_mode = :test
    end
 %>
@@ -19,16 +19,15 @@
      }
    end
 
-   #Order number starts with R (it's not allowed by redsys) and to change the order every time we add a time Stamp afterwards
-   order_number =  @order.number[1..9]
-   order_number += Time.now.strftime("%M%S")[1..3]
 
    #Ds_Merchant_MerchantURL
    notify_url_redsys = redsys_notify_order_redsys_callbacks_url(@order, :payment_method_id => @payment_method, :protocol => 'http')
    notify_url_redsys = (@payment_method.preferred_notify_alternative_domain_url + redsys_notify_order_redsys_callbacks_path(@order, :payment_method_id => @payment_method)) if @payment_method.preferred_notify_alternative_domain_url.present?
 %>
 
-<%= payment_service_for order_number, Spree::Config[:site_name],
+
+
+<%= payment_service_for @order.number, current_store.name,
                         :amount => (@payment_method.amount_in_cents(@order.total)),
                         :currency => @payment_method.preferred_currency,
                         :description => items.to_s[0..120].gsub(/({|")/,'').gsub(/}/,"\n").gsub("=>",": ").gsub("[","(").gsub("]",")"),
@@ -37,15 +36,17 @@
                         :return_url => edit_order_checkout_url(@order, :state => 'payment'),
                         :forward_url => redsys_confirm_order_redsys_callbacks_url(@order, :payment_method_id => @payment_method),
                         :notify_url => notify_url_redsys,
-
-    :service => :redsys do |service| %>
+                        :service => :redsys do |service| %>
 
     <% #Ds_Signature version
        service.signature_version @payment_method.preferred_key_type
     %>
 
+
     <%= submit_tag "Go to payment gateway!", :class => 'clear', :style => 'display:none;'%>
 <%end%>
+
+
 <% content_for :head do %>
 <script>
     var back_url = "<%= edit_order_checkout_url(@order, :state => 'payment')%>";
@@ -56,6 +57,7 @@
           var currentHash = hash();          
           if (currentHash) { document.location.href = back_url; return; }
           hash(back_url, true);
+          document.forms[0].acceptCharset = "ISO-8859-1";
           document.forms[0].submit();
       });
     });
