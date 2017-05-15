@@ -33,7 +33,7 @@
                         :description => items.to_s[0..120].gsub(/({|")/,'').gsub(/}/,"\n").gsub("=>",": ").gsub("[","(").gsub("]",")"),
                         :account_name => "#{@order.ship_address.firstname} #{@order.ship_address.lastname}",
                         :country => @payment_method.provider_class.language_code(I18n.locale),
-                        :return_url => edit_order_checkout_url(@order, :state => 'payment'),
+                        :return_url => edit_order_checkout_url(@order, state: 'payment', origin: 'redsys'),
                         :forward_url => redsys_confirm_order_redsys_callbacks_url(@order, :payment_method_id => @payment_method),
                         :notify_url => notify_url_redsys,
                         :service => :redsys do |service| %>
