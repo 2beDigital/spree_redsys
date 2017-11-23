@@ -21,7 +21,7 @@
 
 
    #Ds_Merchant_MerchantURL
-   notify_url_redsys = redsys_notify_order_redsys_callbacks_url(@order, :payment_method_id => @payment_method, :protocol => 'http')
+   notify_url_redsys = redsys_notify_order_redsys_callbacks_url(@order, :payment_method_id => @payment_method, :protocol => 'https')
    notify_url_redsys = (@payment_method.preferred_notify_alternative_domain_url + redsys_notify_order_redsys_callbacks_path(@order, :payment_method_id => @payment_method)) if @payment_method.preferred_notify_alternative_domain_url.present?
 %>
 
