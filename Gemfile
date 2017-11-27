@@ -1,10 +1,5 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
-if RUBY_VERSION < '1.9'
-  gem 'ruby-debug'
-else
-  gem 'debugger'
-end
-
+gem 'spree', github: 'spree/spree', branch: '3-1-stable'
 
 gemspec
