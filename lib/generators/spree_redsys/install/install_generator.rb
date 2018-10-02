@@ -3,14 +3,20 @@ module SpreeRedsys
     class InstallGenerator < Rails::Generators::Base
 
       def add_javascripts
-        append_file 'app/assets/javascripts/store/all.js', "//= require store/spree_redsys\n"
-        append_file 'app/assets/javascripts/admin/all.js', "//= require admin/spree_redsys\n"
+        append_file 'vendor/assets/javascripts/spree/frontend/all.js', "//= require spree/frontend/spree_redsys\n"
+        append_file 'vendor/assets/javascripts/spree/backend/all.js', "//= require spree/backend/spree_redsys\n"
       end
 
       def add_stylesheets
-        inject_into_file 'app/assets/stylesheets/store/all.css', " *= require store/spree_redsys\n", :before => /\*\//, :verbose => true
-        inject_into_file 'app/assets/stylesheets/admin/all.css', " *= require admin/spree_redsys\n", :before => /\*\//, :verbose => true
+        frontend_css_file = "vendor/assets/stylesheets/spree/frontend/all.css"
+        backend_css_file = "vendor/assets/stylesheets/spree/backend/all.css"
+
+        if File.exist?(backend_css_file) && File.exist?(frontend_css_file)
+           inject_into_file frontend_css_file, " *= require spree/frontend/spree_redsys\n", :before => /\*\//, :verbose => true
+           inject_into_file backend_css_file, " *= require spree/backend/spree_redsys\n", :before => /\*\//, :verbose => true
+        end
       end
+
 
       def add_migrations
         run 'bundle exec rake railties:install:migrations FROM=spree_redsys'
